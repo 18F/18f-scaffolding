@@ -1,0 +1,94 @@
+#! /usr/bin/env bash
+
+# TODO: allow user to set creation location
+# TODO: allow user to set project name
+HERE="$(pwd)"
+NAME="$(/usr/bin/basename $HERE)"
+
+# Check installations
+# TODO: check these during Makefile installation
+type git >/dev/null 2>&1 || {
+  echo "|| ERROR: git not found:"
+  echo "|| please install git"
+  exit 1
+}
+
+type about_yml_generate >/dev/null 2>&1 || {
+  echo "|| ERROR: about_yml_generate not found:"
+  echo "|| please install about_yml_generate: https://github.com/18F/about_yml"
+  echo "|| gem install about_yml should do the trick"
+  exit 1
+}
+
+usage(){
+	echo -e "\nUsage:\n 18f init [options]\n"
+  echo "  Options:"
+  echo "  -h, --help	Display this help message"
+	echo ""
+}
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help") set -- "$@" "-h" ;;
+    *)        set -- "$@" "$arg"
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+while getopts ":h" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+		\? )
+			echo "Unrecognized option: -$OPTARG\n"
+			usage
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND -1))
+
+# Initialize git repo in this directory
+git init >/dev/null
+
+# Grab LICENSE.md and CONTRIBUTING.md
+echo "|| Getting LICENSE.md and CONTRIBUTING.md"
+curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/LICENSE.md
+curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/CONTRIBUTING.md
+
+# Create README.md
+echo "|| Creating README.md"
+echo -e "# $NAME\n\n### Public domain\n\nThis project is in the worldwide [public domain](LICENSE.md). \
+As stated in [CONTRIBUTING](CONTRIBUTING.md):\n\n> This project is in the public domain within \
+the United States, and copyright and related rights in the work worldwide are waived through \
+the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).\
+\n>\n> All contributions to this project will be released under the CC0 dedication. By submitting a \
+pull request, you are agreeing to comply with this waiver of copyright interest." > README.md
+
+# Establish git branches
+echo "|| Creating a develop branch for git flow"
+git checkout -b develop >/dev/null 2>&1
+
+# Create initial .about.yml
+echo "|| Initializing .about.yml"
+about_yml_generate > $HERE/.about.yml
+
+# Install git hooks
+# Clouseau or Poirot
+# about_yml_validate
+# linter(s)
+
+# Create system-security-plan.yml
+# Optional
+
+# Create initial CI metadata
+# Perhaps optional? Or with user input?
+
+# Set Python/Ruby/Node version?

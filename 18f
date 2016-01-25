@@ -1,0 +1,48 @@
+#! /usr/bin/env bash
+
+CMD=$(basename $0)
+ARGS=""
+
+usage(){
+	echo -e "\nUsage:\n 18f [options] <subcommand> [subcommand options] <args>\n"
+  echo "  Options:"
+  echo "  -h, --help	Display this help message"
+	echo ""
+}
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help") set -- "$@" "-h" ;;
+    *)        set -- "$@" "$arg"
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+while getopts ":h" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+		\? )
+			echo "Unrecognized option: -$OPTARG\n"
+			usage
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND -1))
+
+# Find subcommands and subcommand arguments
+SUB=$1; shift
+for var in "$@"; do
+	ARGS+="$var "
+done
+
+# Send to subcommand
+${CMD}-${SUB} ${ARGS}
