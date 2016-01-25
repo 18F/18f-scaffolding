@@ -10,6 +10,11 @@ usage(){
 	echo ""
 }
 
+if [[ $# == 0 ]]; then
+  usage
+  exit 1
+fi
+
 # Convert known long options to short options
 for arg in "$@"; do
   shift

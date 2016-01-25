@@ -1,0 +1,64 @@
+#! /usr/bin/env bash
+
+usage(){
+	echo -e "\nUsage:\n 18f setup [options]\n"
+  echo "  Options:"
+  echo "  -h, --help    Display this help message"
+  echo "  -s, --system  The operating system of this machine"
+	echo ""
+}
+
+setup(){
+  shopt -s nocasematch
+  if [[ $SYSTEM =~ (osx|mac) ]]; then
+    curl --remote-name https://raw.githubusercontent.com/18F/laptop/master/mac
+    bash mac 2>&1 | tee ~/laptop.log
+    rm mac
+  else
+    echo "Supported system options are OSX or Mac"
+    echo "To add more, check out https://github.com/18F/laptop"
+  fi
+}
+
+if [[ $# == 0 ]]; then
+  usage
+  exit 1
+fi
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help") set -- "$@" "-h" ;;
+    "--system") set -- "$@" "-s" ;;
+    *)        set -- "$@" "$arg" ;;
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+while getopts ":hs:" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+    s )
+      SYSTEM=$OPTARG
+      setup
+      ;;
+		\? )
+			echo "Unrecognized option: -$OPTARG\n"
+			usage
+			exit 1
+			;;
+    : )
+      echo "The -$OPTARG option requires an argument"
+      usage
+      exit 1
+      ;;
+	esac
+done
+shift $((OPTIND -1))
