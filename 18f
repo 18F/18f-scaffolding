@@ -4,10 +4,11 @@ CMD=$(basename $0)
 ARGS=""
 
 usage(){
+	AVAILABLE=$(compgen -c 18f-)
 	echo -e "\nUsage:\n 18f [options] <subcommand> [subcommand options] <args>\n"
   echo "  Options:"
   echo "  -h, --help	Display this help message"
-	echo ""
+	echo -e "\nAvailable subcommands:\n${AVAILABLE//18f-/- }\n"
 }
 
 if [[ $# == 0 ]]; then
