@@ -11,8 +11,13 @@ usage(){
 setup(){
   shopt -s nocasematch
   if [[ $SYSTEM =~ (osx|mac) ]]; then
-    curl --remote-name https://raw.githubusercontent.com/18F/laptop/master/mac
-    bash mac 2>&1 | tee ~/laptop.log
+    curl --silent --remote-name https://raw.githubusercontent.com/18F/laptop/master/mac
+    echo "This uses the script found at https://github.com/18F/laptop/blob/master/mac"
+    echo -n "Ready to run the setup script? [y/n] "
+    read response
+    if [[ $response =~ y(es)? ]]; then
+      bash mac 2>&1 | tee ~/laptop.log
+    fi
     rm mac
   else
     echo "Supported system options are OSX or Mac"
@@ -20,7 +25,7 @@ setup(){
   fi
 }
 
-if [[ $# == 0 ]]; then
+if [[ $# -eq 0 ]]; then
   usage
   exit 1
 fi
