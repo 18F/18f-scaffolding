@@ -11,7 +11,7 @@ usage(){
 	echo -e "\nAvailable subcommands:\n${AVAILABLE//18f-/- }\n"
 }
 
-if [[ $# == 0 ]]; then
+if [[ $# -eq 0 ]]; then
   usage
   exit 1
 fi

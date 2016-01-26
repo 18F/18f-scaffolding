@@ -7,6 +7,7 @@ This is a command line utility to standardize common functions here at 18F. It c
 ```bash
 git clone git@github.com:18F/18f-cli.git
 cd 18f-cli
+git checkout release
 make install
 ```
 
@@ -16,9 +17,13 @@ make install
 18f [options] <subcommand> [subcommand options] <args>
 ```
 
-### Built-in commands
+### `18f init`
 
-`18f init` will turn the current directory into a `git` repo with proper `LICENSE.md`, `CONTRIBUTING.md`, `README.md`, and `.about.yml` files.
+Turns the current directory into a `git` repo with proper `LICENSE.md`, `CONTRIBUTING.md`, `README.md`, and `.about.yml` files.
+
+### `18f setup`
+
+Runs the setup script found in https://github.com/18f/laptop. Used to set up a new computer or update an existing one. See that repo for more information about customizing the script through `~/.laptop.local`.
 
 ## Public domain
 
