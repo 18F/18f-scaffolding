@@ -3,7 +3,11 @@
 usage(){
 	echo -e "\nUsage:\n 18f brand [options]\n"
   echo "  Options:"
-  echo "  -h, --help	Display this help message"
+  echo "  -h, --help    Display this help message"
+  echo "  -t, --type    The file type to grab (png, svg, favicon, all)"
+  echo "  -s, --size    The logo size to grab ((s)mall, (m)edium, (l)arge)"
+  echo "  -c, --color   The logo color to grab (black (default) or blue)"
+  echo "  -q, --quiet   Quiet mode"
 	echo ""
 }
 
