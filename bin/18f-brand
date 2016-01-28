@@ -1,0 +1,119 @@
+#! /usr/bin/env bash
+
+usage(){
+	echo -e "\nUsage:\n 18f brand [options]\n"
+  echo "  Options:"
+  echo "  -h, --help	Display this help message"
+	echo ""
+}
+
+# The default logo color of black has no color indicated in the filename,
+# so an empty string will work
+PNG_COLOR=""
+SVG_COLOR="Black"
+
+# The default output location is the current directory
+OUTPUT="."
+
+# The default size is medium
+SIZE="M"
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    --help)
+      set -- "$@" "-h"
+      ;;
+    --quiet)
+      set -- "$@" "-q"
+      ;;
+    --color)
+      set -- "$@" "-c"
+      ;;
+    --type)
+      set -- "$@" "-t"
+      ;;
+    --size)
+      set -- "$@" "-s"
+      ;;
+    *)
+      set -- "$@" "$arg"
+      ;;
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+shopt -s nocasematch
+while getopts ":hqt:s:c:" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+    q )
+      exec 1>/dev/null 2>/dev/null
+      ;;
+    c )
+      if [[ $OPTARG =~ blue ]]; then
+        PNG_COLOR="Bright-"
+        SVG_COLOR="Blue"
+      fi
+      ;;
+    t )
+      if [[ $OPTARG =~ (png|svg|(fav(icon)?|icon)) ]]; then
+        TYPE=$OPTARG
+      else
+        echo "filetypes are png, svg, favicon, and all"
+        usage
+        exit 1
+      fi
+      ;;
+    s )
+      if [[ $OPTARG =~ s(m|mall)? ]]; then
+        SIZE="S"
+      elif [[ $OPTARG =~ m(ed|edium)? ]]; then
+        SIZE="M"
+      elif [[ $OPTARG =~ l(g|rg|arge)? ]]; then
+        SIZE="L"
+      else
+        echo "size options are (s)mall, (m)edium, and (l)arge"
+        usage
+        exit 1
+      fi
+      ;;
+		\? )
+			echo "Unrecognized option: -$OPTARG\n"
+			usage
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND -1))
+
+echo "downloading latest logo zipfile"
+curl --silent --location --remote-name https://github.com/18F/brand/raw/18f-pages-staging/assets/dist/18F_Logo.zip
+unzip -qo 18F_Logo.zip -d /tmp
+if [[ $TYPE == "png" ]]; then
+  echo "copying the .png file to ${OUTPUT}"
+  cp /tmp/18F_Logo/PNG/18F-Logo-${PNG_COLOR}${SIZE}.png ${OUTPUT}
+elif [[ $TYPE = "svg" ]]; then
+  echo "copying the .svg file to ${OUTPUT}"
+  cp /tmp/18F_Logo/SVG/18F-Logo-2016-${SVG_COLOR}.svg ${OUTPUT}
+elif [[ $TYPE =~ (fav(icon)?|icon) ]]; then
+  echo "copying favicons to ${OUTPUT}"
+  cp /tmp/18F_Logo/favicons/favicon-16x16.png ${OUTPUT}
+  cp /tmp/18F_Logo/favicons/favicon-32x32.png ${OUTPUT}
+  cp /tmp/18F_Logo/favicons/favicon.ico ${OUTPUT}
+else
+  echo "copying all files to ${OUTPUT}"
+  cp /tmp/18F_Logo/*/* ${OUTPUT}
+fi
+rm 18F_Logo.zip
+rm -rf /tmp/18F_Logo
+
+# TODO: support font?
+# curl --silent https://pages-staging.18f.gov/brand/assets/dist/18F_Nimbus.zip
