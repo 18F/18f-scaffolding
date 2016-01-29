@@ -4,10 +4,13 @@ This is a command line utility to standardize common functions here at 18F. It c
 
 ## Installation
 
+To set a different name for the central command created, create an `orgname` file with that string.
+
 ```bash
 git clone git@github.com:18F/18f-cli.git
 cd 18f-cli
 git checkout release
+echo YOURORG > orgname # optional
 make install
 ```
 

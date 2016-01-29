@@ -5,6 +5,12 @@
 HERE="$(pwd)"
 NAME="$(/usr/bin/basename $HERE)"
 
+# Poirot pattern location
+PATTERNS="https://raw.githubusercontent.com/DCgov/poirot-patterns/master/default.txt"
+# Two other patterns that can be searched by Poirot
+# https://raw.githubusercontent.com/DCgov/poirot-patterns/master/financial.txt
+# https://raw.githubusercontent.com/DCgov/poirot-patterns/master/ids.txt
+
 # Check installations
 # TODO: check these during Makefile installation
 type git >/dev/null 2>&1 || {
@@ -15,15 +21,19 @@ type git >/dev/null 2>&1 || {
 
 type about_yml_generate >/dev/null 2>&1 || {
   echo "|| ERROR: about_yml_generate not found:"
-  echo "|| please install about_yml_generate: https://github.com/18F/about_yml"
   echo "|| gem install about_yml should do the trick"
   exit 1
+}
+
+type poirot >/dev/null 2>&1 || {
+  echo "|| ERROR: poirot not found:"
+  echo "|| pip install poirot should do the trick"
 }
 
 usage(){
 	echo -e "\nUsage:\n 18f init [options]\n"
   echo "  Options:"
-  echo "  -h, --help	Display this help message"
+  echo "  -h, --help    Display this help message"
 	echo ""
 }
 
@@ -31,8 +41,14 @@ usage(){
 for arg in "$@"; do
   shift
   case "$arg" in
-    "--help") set -- "$@" "-h" ;;
-    *)        set -- "$@" "$arg"
+    --help)
+      set -- "$@" "-h"
+      ;;
+    --quiet)
+      set -- "$@" "-q"
+      ;;
+    *)
+      set -- "$@" "$arg"
   esac
 done
 
@@ -40,12 +56,15 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts ":h" opt; do
+while getopts ":hq" opt; do
 	case "$opt" in
 		h )
 			usage
 			exit 0
 			;;
+    q )
+      exec 1>/dev/null 2>/dev/null
+      ;;
 		\? )
 			echo "Unrecognized option: -$OPTARG\n"
 			usage
@@ -81,7 +100,10 @@ echo "|| Initializing .about.yml"
 about_yml_generate > $HERE/.about.yml
 
 # Install git hooks
-# Clouseau or Poirot
+echo "|| Adding Poirot to git hooks"
+curl --silent https://raw.githubusercontent.com/DCgov/poirot/master/pre-commit-poirot -o .git/hooks/pre-commit-poirot
+echo '.git/hooks/pre-commit-poirot -f "" -p "${PATTERNS}"' >> .git/hooks/pre-commit
+chmod +x ~/.git_template/hooks/pre-commit
 # about_yml_validate
 # linter(s)
 
