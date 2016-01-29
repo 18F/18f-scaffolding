@@ -18,7 +18,7 @@ install:
 		@$(foreach cmd,$(BINS), \
 				echo "Installing $(subst bin/orgwide,$(ORG),$(cmd)) subcommand"; \
 				install -m 0755 $(cmd) $(prefix)/bin; \
-				mv $(prefix)/$(cmd) $(prefix)/bin/$(subst bin/orgwide,$(ORG),$(cmd)); \
+				mv $(prefix)/$(cmd) $(prefix)/$(subst orgwide,$(ORG),$(cmd)); \
 		)
 
 clean:
@@ -26,5 +26,5 @@ clean:
 		@rm $(prefix)/bin/18f
 		@echo "Removing subcommands"
 		@$(foreach cmd,$(BINS), \
-				rm $(prefix)/$(cmd); \
+				rm $(prefix)/$(subst orgwide,$(ORG),$(cmd)); \
 		)
