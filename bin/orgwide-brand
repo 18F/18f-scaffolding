@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 usage(){
-	echo -e "\nUsage:\n 18f brand [options]\n"
+	echo -e "\nUsage:\n $ORG brand [options]\n"
   echo "  Options:"
   echo "  -h, --help    Display this help message"
   echo "  -t, --type    The file type to grab (png, svg, favicon, all)"
@@ -10,6 +10,8 @@ usage(){
   echo "  -q, --quiet   Quiet mode"
 	echo ""
 }
+
+ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
 
 # The default logo color of black has no color indicated in the filename,
 # so an empty string will work
