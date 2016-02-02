@@ -31,18 +31,24 @@ type poirot >/dev/null 2>&1 || {
 }
 
 usage(){
-	echo -e "\nUsage:\n 18f init [options]\n"
-  echo "  Options:"
-  echo "  -h, --help    Display this help message"
-	echo ""
+    echo -e "\nUsage:\n 18f init [options]\n"
+    echo "  Options:"
+    echo "  -h, --help    Display this help message"
+    echo ""
 }
 
 # Convert known long options to short options
 for arg in "$@"; do
   shift
   case "$arg" in
+    --dir)
+      set -- "$@" "-d"
+      ;;
     --help)
       set -- "$@" "-h"
+      ;;
+    --name)
+      set -- "$@" "-n"
       ;;
     --quiet)
       set -- "$@" "-q"
@@ -56,23 +62,33 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts ":hq" opt; do
-	case "$opt" in
-		h )
-			usage
-			exit 0
-			;;
+while getopts "d:hqn:" opt; do
+  case $opt in
+    d )
+      HERE="$OPTARG"
+      ;;
+    h )
+      usage
+      exit 0
+      ;;
+    n )
+      NAME="$OPTARG"
+      ;;
     q )
       exec 1>/dev/null 2>/dev/null
       ;;
-		\? )
-			echo "Unrecognized option: -$OPTARG\n"
-			usage
-			exit 1
-			;;
-	esac
+    \? )
+      echo "Unrecognized option: -$OPTARG\n"
+      usage
+      exit 1
+      ;;
+  esac
 done
 shift $((OPTIND -1))
+
+# Create project directory, if doesn't already exist, and move there
+mkdir -p "$HERE"
+cd "$HERE"
 
 # Initialize git repo in this directory
 git init >/dev/null
@@ -97,7 +113,7 @@ git checkout -b develop >/dev/null 2>&1
 
 # Create initial .about.yml
 echo "|| Initializing .about.yml"
-about_yml_generate > $HERE/.about.yml
+about_yml_generate > .about.yml
 
 # Install git hooks
 echo "|| Adding Poirot to git hooks"
