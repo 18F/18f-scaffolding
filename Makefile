@@ -22,8 +22,8 @@ install:
 		)
 
 clean:
-		@echo "Removing 18f command"
-		@rm $(prefix)/bin/18f
+		@echo "Removing $(ORG) command"
+		@rm $(prefix)/bin/$(ORG)
 		@echo "Removing subcommands"
 		@$(foreach cmd,$(BINS), \
 				rm $(prefix)/$(subst orgwide,$(ORG),$(cmd)); \
