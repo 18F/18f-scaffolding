@@ -4,6 +4,7 @@
 # TODO: allow user to set project name
 HERE="$(pwd)"
 NAME="$(/usr/bin/basename $HERE)"
+ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
 
 # Poirot pattern location
 PATTERNS="https://raw.githubusercontent.com/DCgov/poirot-patterns/master/default.txt"
@@ -31,7 +32,7 @@ type poirot >/dev/null 2>&1 || {
 }
 
 usage(){
-	echo -e "\nUsage:\n 18f init [options]\n"
+	echo -e "\nUsage:\n $ORG init [options]\n"
   echo "  Options:"
   echo "  -h, --help    Display this help message"
 	echo ""
