@@ -33,7 +33,9 @@ type poirot >/dev/null 2>&1 || {
 usage(){
     echo -e "\nUsage:\n 18f init [options]\n"
     echo "  Options:"
+    echo "  -d, --dir     Repository location (defaults to current directory)"
     echo "  -h, --help    Display this help message"
+    echo "  -n, --name    Project name (defaults to current directory name)"
     echo ""
 }
 
