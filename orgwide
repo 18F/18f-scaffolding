@@ -47,8 +47,13 @@ shift $((OPTIND -1))
 # Find subcommands and subcommand arguments
 SUB=$1; shift
 for var in "$@"; do
-	ARGS+="$var "
+	if [[ $var == \-* ]]
+	then
+		ARGS+="$var "
+	else
+		ARGS+="\"$var\" "
+	fi
 done
 
 # Send to subcommand
-${CMD}-${SUB} ${ARGS}
+eval "${CMD}-${SUB} ${ARGS}"
