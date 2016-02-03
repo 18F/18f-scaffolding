@@ -115,14 +115,25 @@ echo "|| Creating a develop branch for git flow"
 git checkout -b develop >/dev/null 2>&1
 
 # Create initial .about.yml
-echo "|| Initializing .about.yml"
-about_yml_generate > .about.yml
+if [[ ! -e .about.yml ]]; then
+  echo "|| Initializing .about.yml"
+  about_yml_generate > .about.yml
+fi
 
 # Install git hooks
-echo "|| Adding Poirot to git hooks"
-curl --silent https://raw.githubusercontent.com/DCgov/poirot/master/pre-commit-poirot -o .git/hooks/pre-commit-poirot
-echo '.git/hooks/pre-commit-poirot -f "" -p "${PATTERNS}"' >> .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit .git/hooks/pre-commit-poirot
+if [[ ! -e .git/hooks/pre-commit ]]; then
+  echo "|| Creating empty pre-commit git hook"
+  touch .git/hooks/pre-commit
+fi
+
+if grep -q "poirot" .git/hooks/pre-commit; then
+  :
+else
+  echo "|| Adding Poirot to git hooks"
+  curl --silent https://raw.githubusercontent.com/DCgov/poirot/master/pre-commit-poirot -o .git/hooks/pre-commit-poirot
+  echo '.git/hooks/pre-commit-poirot -f "" -p "${PATTERNS}"' >> .git/hooks/pre-commit
+  chmod +x .git/hooks/pre-commit .git/hooks/pre-commit-poirot
+fi
 # about_yml_validate
 # linter(s)
 
