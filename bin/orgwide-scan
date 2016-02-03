@@ -1,0 +1,95 @@
+#! /usr/bin/env bash
+
+# OWASP
+# other security things
+# pa11y
+
+SCANS=()
+
+check() {
+  cmd=$1
+  type $cmd >/dev/null 2>&1 || {
+    echo "|| ERROR: ${cmd} not found:"
+    echo "|| please install ${cmd}"
+    exit 1
+  }
+}
+
+usage(){
+	echo -e "\nUsage:\n 18f brand [options]\n"
+  echo "  Options:"
+  echo "  -h, --help               Display this help message"
+  echo "  -a, --accessibility      Scan site accessibility using pa11y"
+  echo "  -u, --url                The URL to scan"
+  echo "  -q, --quiet              Quiet mode"
+	echo ""
+}
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    --help)
+      set -- "$@" "-h"
+      ;;
+    --quiet)
+      set -- "$@" "-q"
+      ;;
+    --accessibility)
+      set -- "$@" "-a"
+      ;;
+    --url)
+      set -- "$@" "-u"
+      ;;
+    *)
+      set -- "$@" "$arg"
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process background option flags first
+while getopts ":hqu:a" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+    q )
+      exec 1>/dev/null 2>/dev/null
+      ;;
+    u )
+      URL=$OPTARG
+      ;;
+    a )
+      SCANS+=(a11y)
+      ;;
+    \? )
+      echo "Unrecognized option: -$OPTARG\n"
+      usage
+      exit 1
+      ;;
+    : )
+      echo "The -$OPTARG option requires an argument"
+      usage
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+for scan in ${SCANS[@]}; do
+  case "$scan" in
+    a11y )
+      check pa11y
+      if [[ -n URL ]]; then
+        pa11y --standard WCAG2AA $URL
+      else
+        echo "An --url is required."
+        usage
+        exit 1
+      fi
+      ;;
+  esac
+done
