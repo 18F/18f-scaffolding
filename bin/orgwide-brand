@@ -94,6 +94,11 @@ while getopts ":hqt:s:c:" opt; do
 			usage
 			exit 1
 			;;
+		: )
+			echo "The -$OPTARG option requires an argument"
+			usage
+			exit 1
+			;;
 	esac
 done
 shift $((OPTIND -1))
