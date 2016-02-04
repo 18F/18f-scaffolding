@@ -1,9 +1,7 @@
 #! /usr/bin/env bash
 
-# TODO: allow user to set creation location
-# TODO: allow user to set project name
-HERE="$(pwd)"
-NAME="$(/usr/bin/basename $HERE)"
+LOCATION="$(pwd)"
+NAME="$(/usr/bin/basename $LOCATION)"
 ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
 
 # Poirot pattern location
@@ -34,7 +32,7 @@ type poirot >/dev/null 2>&1 || {
 usage(){
   echo -e "\nUsage:\n $ORG init [options]\n"
   echo "  Options:"
-  echo "  -d, --dir     Repository location (defaults to current directory)"
+  echo "  -d, --dest     Repository location (defaults to current directory)"
   echo "  -h, --help    Display this help message"
   echo "  -n, --name    Project name (defaults to current directory name)"
   echo ""
@@ -44,7 +42,7 @@ usage(){
 for arg in "$@"; do
   shift
   case "$arg" in
-    --dir)
+    --dest)
       set -- "$@" "-d"
       ;;
     --help)
@@ -68,7 +66,7 @@ OPTIND=1
 while getopts "d:hqn:" opt; do
   case $opt in
     d )
-      HERE="$OPTARG"
+      LOCATION="$OPTARG"
       ;;
     h )
       usage
@@ -90,8 +88,8 @@ done
 shift $((OPTIND -1))
 
 # Create project directory, if doesn't already exist, and move there
-mkdir -p "$HERE"
-cd "$HERE"
+mkdir -p "$LOCATION"
+cd "$LOCATION"
 
 # Initialize git repo in this directory
 git init >/dev/null
