@@ -32,9 +32,10 @@ type poirot >/dev/null 2>&1 || {
 usage(){
   echo -e "\nUsage:\n $ORG init [options]\n"
   echo "  Options:"
-  echo "  -d, --dest     Repository location (defaults to current directory)"
-  echo "  -h, --help    Display this help message"
-  echo "  -n, --name    Project name (defaults to current directory name)"
+  echo "  -d, --dest [DIR]      Repository location (default: current directory)"
+  echo "  -h, --help            Display this help message"
+  echo "  -n, --name [NAME]     Project name (default: current directory name)"
+  echo "  -l, --lang [LANG]     Add language-specific files"
   echo ""
 }
 
@@ -51,6 +52,9 @@ for arg in "$@"; do
     --name)
       set -- "$@" "-n"
       ;;
+    --lang)
+      set -- "$@" "-l"
+      ;;
     --quiet)
       set -- "$@" "-q"
       ;;
@@ -63,7 +67,7 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts "d:hqn:" opt; do
+while getopts "d:hqn:l:" opt; do
   case $opt in
     d )
       LOCATION="$OPTARG"
@@ -74,6 +78,9 @@ while getopts "d:hqn:" opt; do
       ;;
     n )
       NAME="$OPTARG"
+      ;;
+    l )
+      LANG="$OPTARG"
       ;;
     q )
       exec 1>/dev/null 2>/dev/null
@@ -111,7 +118,6 @@ if [[ ! -e README.md ]]; then
 fi
 
 # Establish git branches
-echo "|| Creating a develop branch for git flow"
 git checkout -b develop >/dev/null 2>&1
 
 # Create initial .about.yml
@@ -143,4 +149,12 @@ fi
 # Create initial CI metadata
 # Perhaps optional? Or with user input?
 
-# Set Python/Ruby/Node version?
+# Language-specific additions
+if [[ -n $LANG ]]; then
+  if [[ ! -e .gitignore ]]; then
+    # Using gitignore.io because GitHub's gitignore API is sensitive to
+    # capitalization, which causes problems
+    echo "|| Adding .gitignore for ${LANG}"
+    curl --silent https://www.gitignore.io/api/${LANG} -o .gitignore
+  fi
+fi
