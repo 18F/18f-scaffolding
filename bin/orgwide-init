@@ -36,6 +36,7 @@ usage(){
   echo "  -h, --help            Display this help message"
   echo "  -n, --name [NAME]     Project name (default: current directory name)"
   echo "  -l, --lang [LANG]     Add language-specific files"
+  echo "  -f, --force           Overwrite any existing files"
   echo ""
 }
 
@@ -55,6 +56,9 @@ for arg in "$@"; do
     --lang)
       set -- "$@" "-l"
       ;;
+    --force)
+      set == "$@" "-f"
+      ;;
     --quiet)
       set -- "$@" "-q"
       ;;
@@ -67,7 +71,7 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts "d:hqn:l:" opt; do
+while getopts "d:hfqn:l:" opt; do
   case $opt in
     d )
       LOCATION="$OPTARG"
@@ -81,6 +85,9 @@ while getopts "d:hqn:l:" opt; do
       ;;
     l )
       LANG="$OPTARG"
+      ;;
+    f )
+      FORCE=true
       ;;
     q )
       exec 1>/dev/null 2>/dev/null
@@ -102,12 +109,17 @@ cd "$LOCATION"
 git init >/dev/null
 
 # Grab LICENSE.md and CONTRIBUTING.md
-echo "|| Getting LICENSE.md and CONTRIBUTING.md"
-curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/LICENSE.md
-curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/CONTRIBUTING.md
+if [[ ! -e LICENSE.md ]] || [[ $FORCE ]]; then
+  echo "|| Getting LICENSE.md"
+  curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/LICENSE.md
+fi
+if [[ ! -e CONTRIBUTING.md ]] || [[ $FORCE ]]; then
+  echo "|| Getting CONTRIBUTING.md"
+  curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/CONTRIBUTING.md
+fi
 
 # Create README.md
-if [[ ! -e README.md ]]; then
+if [[ ! -e README.md ]] || [[ $FORCE ]]; then
   echo "|| Creating README.md"
   echo -e "# $NAME\n\n### Public domain\n\nThis project is in the worldwide [public domain](LICENSE.md). \
   As stated in [CONTRIBUTING](CONTRIBUTING.md):\n\n> This project is in the public domain within \
@@ -121,13 +133,13 @@ fi
 git checkout -b develop >/dev/null 2>&1
 
 # Create initial .about.yml
-if [[ ! -e .about.yml ]]; then
+if [[ ! -e .about.yml ]] || [[ $FORCE ]]; then
   echo "|| Initializing .about.yml"
   about_yml_generate > .about.yml
 fi
 
 # Install git hooks
-if [[ ! -e .git/hooks/pre-commit ]]; then
+if [[ ! -e .git/hooks/pre-commit ]] || [[ $FORCE ]]; then
   echo "|| Creating empty pre-commit git hook"
   touch .git/hooks/pre-commit
 fi
@@ -151,7 +163,7 @@ fi
 
 # Language-specific additions
 if [[ -n $LANG ]]; then
-  if [[ ! -e .gitignore ]]; then
+  if [[ ! -e .gitignore ]] || [[ $FORCE ]]; then
     # Using gitignore.io because GitHub's gitignore API is sensitive to
     # capitalization, which causes problems
     echo "|| Adding .gitignore for ${LANG}"
