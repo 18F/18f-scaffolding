@@ -57,7 +57,7 @@ for arg in "$@"; do
       set -- "$@" "-l"
       ;;
     --force)
-      set == "$@" "-f"
+      set -- "$@" "-f"
       ;;
     --quiet)
       set -- "$@" "-q"
@@ -87,7 +87,13 @@ while getopts "d:hfqn:l:" opt; do
       LANG="$OPTARG"
       ;;
     f )
-      FORCE=true
+      echo -n "Are you sure that you want to overwrite existing files? [y/n] "
+      read response
+      if [[ $response =~ y(es)? ]]; then
+        FORCE=true
+      else
+        exit 0
+      fi
       ;;
     q )
       exec 1>/dev/null 2>/dev/null
