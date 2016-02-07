@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 usage(){
-	echo -e "\nUsage:\n $ORG brand [options]\n"
+	echo -e "\nUsage:\n  $ORG brand [options]\n"
   echo "  Options:"
   echo "  -h, --help    Display this help message"
   echo "  -t, --type    The file type to grab (png, svg, favicon, all)"

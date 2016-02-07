@@ -30,7 +30,7 @@ type poirot >/dev/null 2>&1 || {
 }
 
 usage(){
-  echo -e "\nUsage:\n $ORG init [options]\n"
+  echo -e "\nUsage:\n  $ORG init [options]\n"
   echo "  Options:"
   echo "  -d, --dest [DIR]      Repository location (default: current directory)"
   echo "  -h, --help            Display this help message"

@@ -1,15 +1,19 @@
 #! /usr/bin/env bash
 
+VERSION="0.0.1"
 CMD=$(basename $0)
 ARGS=""
 
 usage(){
 	AVAILABLE=$(compgen -c 18f-)
-	echo -e "\nUsage:\n 18f [options] <subcommand> [subcommand options] <args>\n"
+	echo -e "\nUsage:\n  $ORG [options] <subcommand> [subcommand options] <args>\n"
   echo "  Options:"
-  echo "  -h, --help	Display this help message"
+  echo "  -h, --help            Display this help message"
+	echo "  -v, --version         Display version information"
 	echo -e "\nAvailable subcommands:\n${AVAILABLE//18f-/- }\n"
 }
+
+ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -20,8 +24,15 @@ fi
 for arg in "$@"; do
   shift
   case "$arg" in
-    "--help") set -- "$@" "-h" ;;
-    *)        set -- "$@" "$arg"
+    --help)
+			set -- "$@" "-h"
+			;;
+		--version)
+			set -- "$@" "-v"
+			;;
+    *)
+			set -- "$@" "$arg"
+			;;
   esac
 done
 
@@ -29,10 +40,14 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts ":h" opt; do
+while getopts ":hv" opt; do
 	case "$opt" in
 		h )
 			usage
+			exit 0
+			;;
+		v )
+			echo "version $VERSION"
 			exit 0
 			;;
 		\? )
