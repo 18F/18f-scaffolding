@@ -1,0 +1,43 @@
+#! /usr/bin/env bash
+
+ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
+
+usage(){
+  echo -e "\nUsage:\n  $ORG help [subcommand]\n"
+  echo "  Options:"
+  echo "  -h, --help            Display this help message"
+  echo ""
+}
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    --help)
+      set -- "$@" "-h"
+      ;;
+    *)
+      set -- "$@" "$arg"
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+while getopts ":hq" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+		\? )
+			echo "Unrecognized option: -$OPTARG\n"
+			usage
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND -1))
+
+$ORG $1 --help
