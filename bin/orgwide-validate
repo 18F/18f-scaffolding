@@ -1,0 +1,78 @@
+#! /usr/bin/env bash
+
+# Check installations
+# TODO: check these during Makefile installation
+type about_yml_validate >/dev/null 2>&1 || {
+  echo "|| ERROR: about_yml_validate not found:"
+  echo "|| gem install about_yml should do the trick"
+  exit 1
+}
+
+type poirot >/dev/null 2>&1 || {
+  echo "|| ERROR: poirot not found:"
+  echo "|| pip install poirot should do the trick"
+}
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    --help)
+      set -- "$@" "-h"
+      ;;
+    --quiet)
+      set -- "$@" "-q"
+      ;;
+    *)
+      set -- "$@" "$arg"
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+while getopts ":hq" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+    q )
+      exec 1>/dev/null 2>/dev/null
+      ;;
+		\? )
+			echo "Unrecognized option: -$OPTARG\n"
+			usage
+			exit 1
+			;;
+	esac
+done
+shift $((OPTIND -1))
+
+# TODO: about_yml_validate
+
+# Check LICENSE.md
+curl --silent https://raw.githubusercontent.com/18F/open-source-policy/master/LICENSE.md | cmp --silent - LICENSE.md
+if [[ $? == 0 ]]; then
+  echo "✔︎ LICENSE.md is up to date"
+else
+  echo "𝘅 LICENSE.md is different than expected"
+  echo "  Please run curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/LICENSE.md"
+fi
+
+# Check CONTRIBUTING.d
+curl --silent https://raw.githubusercontent.com/18F/open-source-policy/master/CONTRIBUTING.md | cmp --silent - CONTRIBUTING.md
+if [[ $? == 0 ]]; then
+  echo "✔︎ CONTRIBUTING.md is up to date"
+else
+  echo "𝘅 CONTRIBUTING.md is different than expected"
+  echo "  Please run curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/CONTRIBUTING.md"
+fi
+
+if cat README.md | awk "### Public domain\n\nThis project is in the worldwide [public domain](LICENSE.md). As stated in [CONTRIBUTING](CONTRIBUTING.md):\n\n> This project is in the public domain within the United States, and copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).\n>\n> All contributions to this project will be released under the CC0 dedication. By submitting a pull request, you are agreeing to comply with this waiver of copyright interest."; then
+  echo "✔︎ Licensing language in README.md"
+else
+  echo "𝘅 Licensing language is missing from README.md"
+  echo "  Please add the public domain statement from https://github.com/18F/open-source-policy/blob/master/README.md#public-domain"
+fi
