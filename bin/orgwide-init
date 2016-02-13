@@ -85,6 +85,17 @@ while getopts "d:hfqn:l:" opt; do
       ;;
     l )
       LANGUAGE="$OPTARG"
+      case $LANGUAGE in
+        py )
+          LANGUAGE="python"
+          ;;
+        rb )
+          LANGUAGE="ruby"
+          ;;
+        nodejs )
+          LANGUAGE="node"
+          ;;
+      esac
       ;;
     f )
       echo -n "Are you sure that you want to overwrite existing files? [y/n] "
@@ -168,11 +179,20 @@ fi
 # Perhaps optional? Or with user input?
 
 # Language-specific additions
+shopt -s nocasematch
 if [[ -n $LANGUAGE ]]; then
   if [[ ! -e .gitignore ]] || [[ $FORCE ]]; then
     # Using gitignore.io because GitHub's gitignore API is sensitive to
     # capitalization, which causes problems
     echo "|| Adding .gitignore for ${LANGUAGE}"
     curl --silent https://www.gitignore.io/api/${LANGUAGE} -o .gitignore
+  fi
+  if [[ $LANGUAGE =~ node ]]; then
+    npm init --yes
+    sed -e 's/ISC/CC0-1.0/' -e 's/### Public domain//' package.json
+  elif [[ $LANGUAGE =~ ruby ]]; then
+    touch Gemfile
+  elif [[ $LANGUAGE =~ python ]]; then
+    mkvirtualenv $NAME
   fi
 fi
