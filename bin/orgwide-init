@@ -193,6 +193,8 @@ if [[ -n $LANGUAGE ]]; then
   elif [[ $LANGUAGE =~ ruby ]]; then
     touch Gemfile
   elif [[ $LANGUAGE =~ python ]]; then
+    if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
+    pyenv virtualenvwrapper
     mkvirtualenv $NAME
   fi
 fi
