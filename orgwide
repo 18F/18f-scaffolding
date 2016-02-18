@@ -5,12 +5,12 @@ CMD=$(basename $0)
 ARGS=""
 
 usage(){
-	AVAILABLE=$(compgen -c 18f-)
+	AVAILABLE=$(compgen -c $ORG-)
 	echo -e "\nUsage:\n  $ORG [options] <subcommand> [subcommand options] <args>\n"
-  echo "  Options:"
-  echo "  -h, --help            Display this help message"
+  	echo "  Options:"
+  	echo "  -h, --help            Display this help message"
 	echo "  -v, --version         Display version information"
-	echo -e "\nAvailable subcommands:\n${AVAILABLE//18f-/- }\n"
+	echo -e "\nAvailable subcommands:\n${AVAILABLE//$CMD-/- }\n"
 }
 
 ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
