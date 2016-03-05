@@ -190,7 +190,7 @@ if [[ -n $LANGUAGE ]]; then
   fi
   if [[ $LANGUAGE =~ node ]]; then
     npm init --yes
-    sed -e 's/ISC/CC0-1.0/' -e 's/### Public domain//' package.json
+    sed -i -e 's/ISC/CC0-1.0/;s/### Public domain//' package.json
     curl --silent -O https://raw.githubusercontent.com/airbnb/javascript/master/linters/.jshintrc
   elif [[ $LANGUAGE =~ ruby ]]; then
     touch Gemfile
