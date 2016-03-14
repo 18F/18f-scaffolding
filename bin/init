@@ -166,7 +166,7 @@ if grep -q "poirot" .git/hooks/pre-commit; then
 else
   echo "|| Adding Poirot to git hooks"
   curl --silent https://raw.githubusercontent.com/DCgov/poirot/master/pre-commit-poirot -o .git/hooks/pre-commit-poirot
-  echo '.git/hooks/pre-commit-poirot -f "" -p "${PATTERNS}"' >> .git/hooks/pre-commit
+  echo ".git/hooks/pre-commit-poirot -f \"\" -p \"${PATTERNS}\"" >> .git/hooks/pre-commit
   chmod +x .git/hooks/pre-commit .git/hooks/pre-commit-poirot
 fi
 # about_yml_validate
