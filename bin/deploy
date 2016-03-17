@@ -18,6 +18,9 @@ if cf target | grep -q "Not logged in"; then
   else
     cf login
   fi
+else
+  :
+  #TODO: save current target and return to that after push
 fi
 
 usage(){
@@ -159,8 +162,7 @@ fi
 
 # Push the app
 if [[ ! $DOWNTIME ]]; then
-  # cf zero-downtime-push $NAME -f $MANIFEST
-  echo "FAKE PUSH 14759284750928347509238475092387509238475"
+  cf zero-downtime-push $NAME -f $MANIFEST
 else
   cf push -f $MANIFEST
 fi
