@@ -148,9 +148,7 @@ fi
 
 # Push the app
 if [[ ! $DOWNTIME ]]; then
-  # cf zero-downtime-push $NAME -f $MANIFEST
-  echo "FAKE PUSH"
+  cf zero-downtime-push $NAME -f $MANIFEST
 else
-  # cf push -f $MANIFEST
-  echo "FAKE DOWN PUSH"
+  cf push -f $MANIFEST
 fi
