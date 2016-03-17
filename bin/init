@@ -11,7 +11,6 @@ PATTERNS="https://raw.githubusercontent.com/DCgov/poirot-patterns/master/default
 # https://raw.githubusercontent.com/DCgov/poirot-patterns/master/ids.txt
 
 # Check installations
-# TODO: check these during Makefile installation
 type git >/dev/null 2>&1 || {
   echo "|| ERROR: git not found:"
   echo "|| please install git"
@@ -27,6 +26,7 @@ type about_yml_generate >/dev/null 2>&1 || {
 type poirot >/dev/null 2>&1 || {
   echo "|| ERROR: poirot not found:"
   echo "|| pip install poirot should do the trick"
+  exit 1
 }
 
 usage(){
