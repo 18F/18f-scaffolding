@@ -9,10 +9,11 @@ type cf >/dev/null 2>&1 || {
 API="https://api.cloud.gov"
 
 # Check whether logged in
-if cf target | grep "Not logged in"; then
+if cf target | grep -q "Not logged in"; then
   echo "|| Not logged into cf"
   if [[ $CF_USERNAME && $CF_PASSWORD ]]; then
     # Log in to the sandbox to avoid the org/space selection prompt
+    # The script will target the correct org/space in a few lines
     cf login -a $API -u $CF_USERNAME -p $CF_PASSWORD -o sandbox
   else
     cf login
@@ -86,23 +87,35 @@ while getopts "hdt" opt; do
 done
 shift $((OPTIND -1))
 
+# Check whether autopilot is installed for zero-downtime deploys
+if [[ ! $DOWNTIME ]]; then
+  if cf plugins | grep -q "autopilot"; then
+    :
+  else
+    echo "Install autopilot to use zero-downtime deploys. For installation instructions, see:"
+    echo "https://github.com/concourse/autopilot#installation"
+  fi
+fi
+
 # Gather information from manifest and CF API
 if [[ $1 = "production" ]]; then
-  NAME=$(cat manifest.yml | grep name | cut -d':' -f2 | tr -d ' ')
-  get_org
-  MANIFEST="manifest.yml"
-elif [[ $1 = "staging" ]]; then
-  NAME=$(cat manifest-staging.yml | grep name | cut -d':' -f2 | tr -d ' ')
-  get_org
-  MANIFEST="manifest-staging.yml"
+  if [[ -e manifest.yml ]]; then
+    NAME=$(cat manifest.yml | grep name | cut -d':' -f2 | tr -d ' ')
+    get_org
+    MANIFEST="manifest.yml"
+  else
+    echo "Error: can't locate manifest.yml"
+    usage
+    exit 1
+  fi
 elif [[ -e manifest-${1}.yml ]]; then
   NAME=$(cat manifest-${1}.yml | grep name | cut -d':' -f2 | tr -d ' ')
   get_org
   MANIFEST="manifest-${1}.yml"
 else
-  echo -e "Error: can't locate manifest-${1}.yml\n"
+  echo -e "Error: can't locate manifest-${1}.yml"
   usage
-  exit
+  exit 1
 fi
 
 # Point to the appropriate CF org and space
