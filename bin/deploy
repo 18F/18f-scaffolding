@@ -28,6 +28,7 @@ usage(){
   echo "  Options:"
   echo "  -h, --help               Display this help message"
   echo "  -t, --timid              Confirm org and space settings before pushing"
+  echo "  -f, --force              Skip check for environment variables set outside of a UPS"
   echo "  -d, --some-downtime      Perform a some-downtime deploy (default: zero-downtime)"
 	echo ""
 }
@@ -56,13 +57,17 @@ for arg in "$@"; do
     --some-downtime)
       # Why this option? It may be useful for projects that don't want to allocate
       # the memory to run two apps, as required for zero-downtime deploys
-      set == "$@" "-d"
+      set -- "$@" "-d"
       ;;
     --timid)
-      set == "$@" "-t"
+      set -- "$@" "-t"
+      ;;
+    --force)
+      set -- "$@" "-f"
       ;;
     *)
       set -- "$@" "$arg"
+      ;;
   esac
 done
 
@@ -82,6 +87,9 @@ while getopts "hdt" opt; do
       ;;
     d )
       DOWNTIME=true
+      ;;
+    f )
+      FORCE=true
       ;;
   esac
 done
@@ -137,7 +145,7 @@ fi
 # Check that no user-set environment variables will get lost in a zero-downtime deploy.
 # Since zero-downtime works by creating a new instance and then switching to it, environment
 # variables only persist if they are set by a User-Provided Service.
-if [[ $(echo $CF_APP_DATA | jq '.entity.environment_json | length') > 0 ]] && [[ ! $DOWNTIME ]]; then
+if [[ $(echo $CF_APP_DATA | jq '.entity.environment_json | length') > 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
   echo "The following environment variables will be lost! "
   echo $CF_APP_DATA | jq '.entity.environment_json | keys[]'
   echo -en "To keep them, set up a User-Provided Service and bind it to the app:\n http://docs.cloudfoundry.org/devguide/services/user-provided.html\nStill proceed with push? [y/n] "
