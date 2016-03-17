@@ -42,6 +42,12 @@ Allows a variety of pre-configured scans to be run on a project. Currently suppo
 
 Downloads the 18F brand assets, either in whole or in part. Useful as a periodic check to keep assets up-to-date.
 
+### Extra scripts
+
+This repo also includes some scripts for standalone use, either in continuous integration services or on cloud.gov.
+- `cf-db.sh`: get a `psql` binary for use on cloud.gov and connect to the database.
+- `deploy.sh`: a deployment script for deploying from a continuous integration service
+
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for additional information.

@@ -97,7 +97,7 @@ if [[ ! $DOWNTIME ]]; then
   fi
 fi
 
-# Gather information from manifest and CF API
+# Gather information from manifest
 if [[ $1 = "production" ]]; then
   MANIFEST="manifest.yml"
 else
