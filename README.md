@@ -1,17 +1,14 @@
 # The 18F Command
 
-This is a command line utility to standardize common functions here at 18F. It can be extended by putting any command with the format `18f-yourcommand` on your `PATH`.
+A set of command line utilities to standardize common functions here at 18F.
 
 ## Installation
 
-To set a different name for the central command created, create an `orgname` file with that string.
+This set of scripts is designed to be used with [`groupthink`](https://github.com/DCgov/groupthink).
 
 ```bash
-git clone git@github.com:18F/18f-cli.git
-cd 18f-cli
-git checkout release
-echo YOURORG > orgname # optional
-make install
+pip install groupthink
+groupthink install 18f
 ```
 
 ## Usage
@@ -27,6 +24,32 @@ Turns the current directory into a `git` repo with proper `LICENSE.md`, `CONTRIB
 ### `18f setup`
 
 Runs the setup script found in https://github.com/18f/laptop. Used to set up a new computer or update an existing one. See that repo for more information about customizing the script through `~/.laptop.local`.
+
+### `18f validate`
+
+Checks a repo to see whether it has the standard 18F files, as created by `18f init`.
+
+### `18f deploy`
+
+Deploys a project to Cloud Foundry (and, more specifically, cloud.gov).
+
+### `18f scan`
+
+Allows a variety of pre-configured scans to be run on a project. Currently supports:
+- Accessibility (§ 508)
+
+### `18f brand`
+
+Downloads the 18F brand assets, either in whole or in part. Useful as a periodic check to keep assets up-to-date.
+
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md) for additional information.
+
+### Branch flow
+
+- Main branch: `release`
+- Development branch: `develop`
 
 ## Public domain
 

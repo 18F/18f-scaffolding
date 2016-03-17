@@ -93,7 +93,7 @@ for scan in ${SCANS[@]}; do
       if [[ -n URL ]]; then
         pa11y --standard WCAG2AA $URL
       else
-        echo "An --url is required."
+        echo "No URL specified. Use --url to set one."
         usage
         exit 1
       fi
