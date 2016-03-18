@@ -1,16 +1,21 @@
 #! /usr/bin/env bash
 
+
+echo $FUNCNAME
+exit
+
 type cf >/dev/null 2>&1 || {
-  echo "|| ERROR: cf not found:"
-  echo "|| please install cf"
+  echo " ERROR: cf not found:"
+  echo " please install cf"
   exit 1
 }
 
 API="https://api.cloud.gov"
-
+18f
 # Check whether logged in
-if cf target | grep -q "Not logged in"; then
-  echo "|| Not logged into cf"
+CURRENT_TARGET=$(cf target)
+if echo $CURRENT_TARGET | grep -q "Not logged in"; then
+  echo " Not logged into cf"
   if [[ $CF_USERNAME && $CF_PASSWORD ]]; then
     # Log in to the sandbox to avoid the org/space selection prompt
     # The script will target the correct org/space in a few lines
@@ -19,12 +24,12 @@ if cf target | grep -q "Not logged in"; then
     cf login
   fi
 else
-  :
-  #TODO: save current target and return to that after push
+  OLD_ORG=$(echo $CURRENT_TARGET | cut -d' ' -f10)
+  OLD_SPACE=$(echo $CURRENT_TARGET | cut -d' ' -f12)
 fi
 
 usage(){
-  echo -e "\nUsage:\n  $( echo `basename "$0"` | cut -d'-' -f1 ) deploy [options] <arg>\n"
+  echo -e "\nUsage:\n  18f deploy [options] <arg>\n"
   echo "Passing 'production' as the argument will look for manifest.yml in the current directory,"
   echo "and push if it is found. Passing any other string will look for manifest-yourstring.yml and"
   echo -e "use that file instead.\n"
@@ -44,11 +49,6 @@ get_org(){
   ORG_URL=$(echo $CF_SPACE_DATA | jq '.entity.organization_url' | tr -d '"')
   CF_ORG=$(cf curl ${ORG_URL} -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.entity.name'  | tr -d '"')
 }
-
-if [ $# -ne 1 ]; then
-  usage
-  exit 0
-fi
 
 # Convert known long options to short options
 for arg in "$@"; do
@@ -97,6 +97,12 @@ while getopts "hdt" opt; do
   esac
 done
 shift $((OPTIND -1))
+
+if [ $# -ne 1 ]; then
+  echo "Error: argument missing."
+  usage
+  exit 0
+fi
 
 # Check whether autopilot is installed for zero-downtime deploys
 if [[ ! $DOWNTIME ]]; then
@@ -165,4 +171,9 @@ if [[ ! $DOWNTIME ]]; then
   cf zero-downtime-push $NAME -f $MANIFEST
 else
   cf push -f $MANIFEST
+fi
+
+# Return to the previous state, if applicable
+if [[ $OLD_ORG ]] && [[ $OLD_SPACE ]]; then
+  cf target -o $OLD_ORG -s $OLD_SPACE > /dev/null 2>&1
 fi
