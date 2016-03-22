@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 usage(){
-	echo -e "\nUsage:\n  $ORG setup [options]\n"
+	echo -e "\nUsage:\n  18f setup [options]\n"
   echo "  Options:"
   echo "  -h, --help    Display this help message"
   echo "  -s, --system  The operating system of this machine"
@@ -24,8 +24,6 @@ setup(){
     echo "To add more, check out https://github.com/18F/laptop"
   fi
 }
-
-ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
 
 if [[ $# -eq 0 ]]; then
   usage

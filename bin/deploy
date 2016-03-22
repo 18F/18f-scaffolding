@@ -1,9 +1,5 @@
 #! /usr/bin/env bash
 
-
-echo $FUNCNAME
-exit
-
 type cf >/dev/null 2>&1 || {
   echo " ERROR: cf not found:"
   echo " please install cf"

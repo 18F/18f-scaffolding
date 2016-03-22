@@ -2,7 +2,6 @@
 
 LOCATION="$(pwd)"
 NAME="$(/usr/bin/basename $LOCATION)"
-ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
 
 # Poirot pattern location
 PATTERNS="https://raw.githubusercontent.com/DCgov/poirot-patterns/master/default.txt"
@@ -12,25 +11,25 @@ PATTERNS="https://raw.githubusercontent.com/DCgov/poirot-patterns/master/default
 
 # Check installations
 type git >/dev/null 2>&1 || {
-  echo "|| ERROR: git not found:"
-  echo "|| please install git"
+  echo " ERROR: git not found:"
+  echo " please install git"
   exit 1
 }
 
 type about_yml_generate >/dev/null 2>&1 || {
-  echo "|| ERROR: about_yml_generate not found:"
-  echo "|| gem install about_yml should do the trick"
+  echo " ERROR: about_yml_generate not found:"
+  echo " gem install about_yml should do the trick"
   exit 1
 }
 
 type poirot >/dev/null 2>&1 || {
-  echo "|| ERROR: poirot not found:"
-  echo "|| pip install poirot should do the trick"
+  echo " ERROR: poirot not found:"
+  echo " pip install poirot should do the trick"
   exit 1
 }
 
 usage(){
-  echo -e "\nUsage:\n  $ORG init [options]\n"
+  echo -e "\nUsage:\n  18f init [options]\n"
   echo "  Options:"
   echo "  -d, --dest [DIR]      Repository location (default: current directory)"
   echo "  -h, --help            Display this help message"
@@ -127,17 +126,17 @@ git init >/dev/null
 
 # Grab LICENSE.md and CONTRIBUTING.md
 if [[ ! -e LICENSE.md ]] || [[ $FORCE ]]; then
-  echo "|| Getting LICENSE.md"
+  echo " Getting LICENSE.md"
   curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/LICENSE.md
 fi
 if [[ ! -e CONTRIBUTING.md ]] || [[ $FORCE ]]; then
-  echo "|| Getting CONTRIBUTING.md"
+  echo " Getting CONTRIBUTING.md"
   curl -sO https://raw.githubusercontent.com/18F/open-source-policy/master/CONTRIBUTING.md
 fi
 
 # Create README.md
 if [[ ! -e README.md ]] || [[ $FORCE ]]; then
-  echo "|| Creating README.md"
+  echo " Creating README.md"
   echo -e "# $NAME\n\n### Public domain\n\nThis project is in the worldwide [public domain](LICENSE.md). \
   As stated in [CONTRIBUTING](CONTRIBUTING.md):\n\n> This project is in the public domain within \
   the United States, and copyright and related rights in the work worldwide are waived through \
@@ -151,20 +150,20 @@ git checkout -b develop >/dev/null 2>&1
 
 # Create initial .about.yml
 if [[ ! -e .about.yml ]] || [[ $FORCE ]]; then
-  echo "|| Initializing .about.yml"
+  echo " Initializing .about.yml"
   about_yml_generate > .about.yml
 fi
 
 # Install git hooks
 if [[ ! -e .git/hooks/pre-commit ]] || [[ $FORCE ]]; then
-  echo "|| Creating empty pre-commit git hook"
+  echo " Creating empty pre-commit git hook"
   touch .git/hooks/pre-commit
 fi
 
 if grep -q "poirot" .git/hooks/pre-commit; then
   :
 else
-  echo "|| Adding Poirot to git hooks"
+  echo " Adding Poirot to git hooks"
   curl --silent https://raw.githubusercontent.com/DCgov/poirot/master/pre-commit-poirot -o .git/hooks/pre-commit-poirot
   echo ".git/hooks/pre-commit-poirot -f \"\" -p \"${PATTERNS}\"" >> .git/hooks/pre-commit
   chmod +x .git/hooks/pre-commit .git/hooks/pre-commit-poirot
@@ -184,7 +183,7 @@ if [[ -n $LANGUAGE ]]; then
   if [[ ! -e .gitignore ]] || [[ $FORCE ]]; then
     # Using gitignore.io because GitHub's gitignore API is sensitive to
     # capitalization, which causes problems
-    echo "|| Adding .gitignore for ${LANGUAGE}"
+    echo " Adding .gitignore for ${LANGUAGE}"
     curl --silent https://www.gitignore.io/api/${LANGUAGE} -o .gitignore
     ln -s .gitignore .cfignore
   fi

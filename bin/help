@@ -1,9 +1,7 @@
 #! /usr/bin/env bash
 
-ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
-
 usage(){
-  echo -e "\nUsage:\n  $ORG help [subcommand]\n"
+  echo -e "\nUsage:\n  18f help [subcommand]\n"
   echo "  Options:"
   echo "  -h, --help            Display this help message"
   echo ""
@@ -40,4 +38,4 @@ while getopts ":hq" opt; do
 done
 shift $((OPTIND -1))
 
-$ORG $1 --help
+18f $1 --help

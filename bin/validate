@@ -3,14 +3,14 @@
 # Check installations
 # TODO: check these during Makefile installation
 type about_yml_validate >/dev/null 2>&1 || {
-  echo "|| ERROR: about_yml_validate not found:"
-  echo "|| gem install about_yml should do the trick"
+  echo " ERROR: about_yml_validate not found:"
+  echo " gem install about_yml should do the trick"
   exit 1
 }
 
 type poirot >/dev/null 2>&1 || {
-  echo "|| ERROR: poirot not found:"
-  echo "|| pip install poirot should do the trick"
+  echo " ERROR: poirot not found:"
+  echo " pip install poirot should do the trick"
 }
 
 # Convert known long options to short options

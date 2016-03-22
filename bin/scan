@@ -9,14 +9,14 @@ SCANS=()
 check() {
   cmd=$1
   type $cmd >/dev/null 2>&1 || {
-    echo "|| ERROR: ${cmd} not found:"
-    echo "|| please install ${cmd}"
+    echo " ERROR: ${cmd} not found:"
+    echo " please install ${cmd}"
     exit 1
   }
 }
 
 usage(){
-	echo -e "\nUsage:\n  $ORG brand [options]\n"
+	echo -e "\nUsage:\n  18f brand [options]\n"
   echo "  Options:"
   echo "  -h, --help               Display this help message"
   echo "  -a, --accessibility      Scan site accessibility using pa11y"
@@ -24,8 +24,6 @@ usage(){
   echo "  -q, --quiet              Quiet mode"
 	echo ""
 }
-
-ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
 
 if [[ $# -eq 0 ]]; then
   usage
