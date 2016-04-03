@@ -1,5 +1,13 @@
 #! /usr/bin/env bash
 
+usage(){
+  echo -e "\nUsage:\n  18f validate [options]\n"
+  echo "  Options:"
+  echo "  -h, --help               Display this help message"
+  echo "  -q, --quiet              Quiet mode"
+	echo ""
+}
+
 # Check installations
 # TODO: check these during Makefile installation
 type about_yml_validate >/dev/null 2>&1 || {

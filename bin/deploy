@@ -7,7 +7,7 @@ type cf >/dev/null 2>&1 || {
 }
 
 API="https://api.cloud.gov"
-18f
+
 # Check whether logged in
 CURRENT_TARGET=$(cf target)
 if echo $CURRENT_TARGET | grep -q "Not logged in"; then
@@ -38,6 +38,7 @@ usage(){
 }
 
 get_org(){
+  #TODO: catch multiple apps with the same name and prompt for more info
   CF_APP_DATA=$(cf curl "/v2/apps" -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.resources[] | select(.entity.name == "'${NAME}'")')
   SPACE_URL=$(echo $CF_APP_DATA | jq '.entity.space_url' | tr -d '"')
   CF_SPACE_DATA=$(cf curl "${SPACE_URL}" -X GET -H "Content-Type: application/x-www-form-urlencoded")
@@ -82,7 +83,6 @@ while getopts "hdt" opt; do
       ;;
     t )
       TIMID=true
-      echo "hello"
       ;;
     d )
       DOWNTIME=true
@@ -170,6 +170,6 @@ else
 fi
 
 # Return to the previous state, if applicable
-if [[ $OLD_ORG ]] && [[ $OLD_SPACE ]]; then
+if [[ -v $OLD_ORG ]] && [[ -v $OLD_SPACE ]]; then
   cf target -o $OLD_ORG -s $OLD_SPACE > /dev/null 2>&1
 fi

@@ -16,7 +16,7 @@ check() {
 }
 
 usage(){
-	echo -e "\nUsage:\n  18f brand [options]\n"
+	echo -e "\nUsage:\n  18f scan [options]\n"
   echo "  Options:"
   echo "  -h, --help               Display this help message"
   echo "  -a, --accessibility      Scan site accessibility using pa11y"
