@@ -137,12 +137,8 @@ fi
 # Create README.md
 if [[ ! -e README.md ]] || [[ $FORCE ]]; then
   echo " Creating README.md"
-  echo -e "# $NAME\n\n### Public domain\n\nThis project is in the worldwide [public domain](LICENSE.md). \
-  As stated in [CONTRIBUTING](CONTRIBUTING.md):\n\n> This project is in the public domain within \
-  the United States, and copyright and related rights in the work worldwide are waived through \
-  the [CC0 1.0 Universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).\
-  \n>\n> All contributions to this project will be released under the CC0 dedication. By submitting a \
-  pull request, you are agreeing to comply with this waiver of copyright interest." > README.md
+  curl -s https://raw.githubusercontent.com/18F/open-source-policy/master/README_TEMPLATE.md -o README.md
+  sed -i "" 's/\[Repo Name\]/'$NAME'/' README.md
 fi
 
 # Establish git branches
@@ -188,14 +184,22 @@ if [[ -n $LANGUAGE ]]; then
     ln -s .gitignore .cfignore
   fi
   if [[ $LANGUAGE =~ node ]]; then
-    npm init --yes
-    sed -i -e 's/ISC/CC0-1.0/;s/### Public domain//' package.json
+    if [[ ! -e package.json ]]; then
+      echo " Initializing basic Node files"
+      npm init --yes > /dev/null 2>&1
+      sed -i "" -e 's/ISC/CC0-1.0/;s/### Public domain//' package.json
+    fi
     curl --silent -O https://raw.githubusercontent.com/airbnb/javascript/master/linters/.jshintrc
   elif [[ $LANGUAGE =~ ruby ]]; then
+    echo " Initializing basic Ruby files"
     touch Gemfile
   elif [[ $LANGUAGE =~ python ]]; then
-    if which pyenv > /dev/null; then eval "$(pyenv init -)"; fi
-    pyenv virtualenvwrapper
-    mkvirtualenv $NAME
+    echo " Initializing basic Python files"
+    if which pyenv > /dev/null; then
+      echo " Attempting to create virtualenv"
+      eval "$(pyenv init -)"
+      pyenv virtualenvwrapper
+      mkvirtualenv $NAME
+    fi
   fi
 fi
