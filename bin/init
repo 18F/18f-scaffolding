@@ -164,6 +164,15 @@ else
   echo ".git/hooks/pre-commit-poirot -f \"\" -p \"${PATTERNS}\"" >> .git/hooks/pre-commit
   chmod +x .git/hooks/pre-commit .git/hooks/pre-commit-poirot
 fi
+
+if grep -q "latest-commit" .git/hooks/pre-commit; then
+  :
+else
+  echo " Adding latest-commit.sh to git hooks"
+  curl --silent https://raw.githubusercontent.com/18f/18f-cli/release/scripts/latest-commit -o .git/hooks/latest-commit
+  echo ".git/hooks/latest-commit" >> .git/hooks/pre-commit
+  chmod +x .git/hooks/latest-commit
+fi
 # about_yml_validate
 # linter(s)
 
