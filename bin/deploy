@@ -162,6 +162,13 @@ if [[ $(echo $CF_APP_DATA | jq '.entity.environment_json | length') > 0 ]] && [[
   fi
 fi
 
+LATEST_COMMIT=$(find . -name latest-commit.txt)
+
+if [[ -n $LATEST_COMMIT ]]; then
+  git rev-parse --abbrev-ref HEAD > $LATEST_COMMIT
+  git rev-parse HEAD >> $LATEST_COMMIT
+fi
+
 # Push the app
 if [[ ! $DOWNTIME ]]; then
   cf zero-downtime-push $NAME -f $MANIFEST
