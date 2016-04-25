@@ -136,9 +136,29 @@ fi
 
 # Create README.md
 if [[ ! -e README.md ]] || [[ $FORCE ]]; then
-  echo " Creating README.md"
-  curl -s https://raw.githubusercontent.com/18F/open-source-policy/master/README_TEMPLATE.md -o README.md
-  sed -i "" 's/\[Repo Name\]/'$NAME'/' README.md
+  if [[ $FORCE ]]; then
+    echo " Creating README.md"
+    curl -s https://raw.githubusercontent.com/18F/open-source-policy/master/README_TEMPLATE.md -o README.md
+    sed -i "" 's/\[Repo Name\]/'$NAME'/' README.md
+  else
+    for file in README*; do
+      if [[ -e $file ]]; then
+        echo -n " Found an existing README: ${file}. Would you like to convert it to README.md? (y/n) "
+        read response
+        if [[ $response =~ y(es)? ]]; then
+          pandoc $file -o README.md
+        else
+          echo -n " Would you like to create a separate README.md? (y/n) "
+          read response
+          if [[ $response =~ y(es)? ]]; then
+            echo " Creating README.md"
+            curl -s https://raw.githubusercontent.com/18F/open-source-policy/master/README_TEMPLATE.md -o README.md
+            sed -i "" 's/\[Repo Name\]/'$NAME'/' README.md
+          fi
+        fi
+      fi
+    done
+  fi
 fi
 
 # Establish git branches
