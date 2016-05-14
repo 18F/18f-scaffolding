@@ -1,0 +1,26 @@
+#! /usr/bin/env bash
+
+PREFIX=/usr/local/bin
+ORGNAME="18f"
+
+if git status | grep fatal; then
+  CURL=true
+  cd /tmp
+  git clone https://github.com/18f/18f-cli
+  cd 18f-cli
+fi
+
+echo "Installing main $ORGNAME command"
+cp main $PREFIX/$ORGNAME
+
+cd bin
+BINS=$(find *)
+for bin in $BINS; do
+  echo "Installing $bin subcommand"
+  cp $bin $PREFIX/$bin
+done
+
+if [[ $CURL ]]; then
+  cd /tmp
+  rm -rf 18f-cli
+fi

@@ -4,11 +4,17 @@ A set of command line utilities to standardize common functions here at 18F.
 
 ## Installation
 
-This set of scripts is designed to be used with [`groupthink`](https://github.com/DCgov/groupthink).
+```
+curl -sO https://raw.githubusercontent.com/18f/18f-cli/release/install
+bash ./install
+```
 
-```bash
-pip install groupthink
-groupthink install 18f
+If you'd like to keep a copy of the `git` repository around:
+
+```
+git clone https://github.com/18f/18f-cli/
+cd 18f-cli
+bash ./install
 ```
 
 ## Usage
@@ -51,6 +57,12 @@ This repo also includes some scripts for standalone use, either in continuous in
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for additional information.
+
+### Local development
+
+This script is really a bundle of scripts: one main script and a bunch of subcommands. The main script—called `main`—looks for scripts named `18f-whatever` in `/usr/local/bin/` and makes them available as `18f whatever`.
+
+New scripts should be added to this repository's `bin` folder without the `18f-` prefix, as that will be added during installation. They can be written in any language, but care should be taken to choose a language that most users will have. Similarly, there is a preference for avoiding additional dependencies in new scripts.
 
 ### Branch flow
 
