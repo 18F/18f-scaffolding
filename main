@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 
-VERSION="0.0.1"
-CMD=$(basename $0)
+CMD=$(basename "$0")
 ARGS=""
 
 usage(){
@@ -13,7 +12,7 @@ usage(){
 	echo -e "\nAvailable subcommands:\n${AVAILABLE//18f-/- }\n"
 }
 
-ORG=$( echo `basename "$0"` | cut -d'-' -f1 )
+ORG=$( basename "$0" | cut -d'-' -f1 )
 
 if [[ $# -eq 0 ]]; then
   usage
@@ -47,11 +46,11 @@ while getopts ":hv" opt; do
 			exit 0
 			;;
 		v )
-			echo "version $VERSION"
+			echo "version $(cat ./VERSION)"
 			exit 0
 			;;
 		\? )
-			echo "Unrecognized option: -$OPTARG\n"
+			echo -e "Unrecognized option: -$OPTARG\n"
 			usage
 			exit 1
 			;;

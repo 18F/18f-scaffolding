@@ -5,15 +5,15 @@ ORGNAME="18f"
 
 if git status | grep fatal; then
   CURL=true
-  cd /tmp
+  cd /tmp || exit 1
   git clone https://github.com/18f/18f-cli
-  cd 18f-cli
+  cd 18f-cli || exit 1
 fi
 
 echo "Installing main $ORGNAME command"
 cp main $PREFIX/$ORGNAME
 
-cd bin
+cd bin || exit 1
 BINS=$(find *)
 for bin in $BINS; do
   echo "Installing $bin subcommand"
@@ -21,6 +21,6 @@ for bin in $BINS; do
 done
 
 if [[ $CURL ]]; then
-  cd /tmp
+  cd /tmp || exit 1
   rm -rf 18f-cli
 fi
