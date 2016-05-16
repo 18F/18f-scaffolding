@@ -1,0 +1,50 @@
+#! /usr/bin/env bash
+
+usage(){
+  echo -e "\nUsage:\n  18f upgrade [options]\n"
+  echo "  Options:"
+  echo "  -h, --help    Display this help message"
+  echo ""
+}
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help") set -- "$@" "-h" ;;
+    *)        set -- "$@" "$arg" ;;
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+while getopts ":hs:" opt; do
+	case "$opt" in
+		h )
+			usage
+			exit 0
+			;;
+		\? )
+			echo "Unrecognized option: -$OPTARG\n"
+			usage
+			exit 1
+			;;
+    : )
+      echo "The -$OPTARG option requires an argument"
+      usage
+      exit 1
+      ;;
+	esac
+done
+shift $((OPTIND -1))
+
+REMOTE=$(curl -s https://raw.githubusercontent.com/18f/18f-cli/release/VERSION)
+LOCAL=$(18f --version)
+
+if [[ "$REMOTE" != "$LOCAL" ]]; then
+  curl -s https://raw.githubusercontent.com/18f/18f-cli/release/install | bash
+else
+  echo "Already at the latest version!"
+fi
