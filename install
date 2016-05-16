@@ -17,7 +17,7 @@ cd bin || exit 1
 BINS=$(find *)
 for bin in $BINS; do
   echo "Installing $bin subcommand"
-  cp $bin $PREFIX/$bin
+  cp $bin $PREFIX/$ORGNAME-$bin
 done
 
 if [[ $CURL ]]; then
