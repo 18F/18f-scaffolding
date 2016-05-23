@@ -3,7 +3,7 @@
 PREFIX=/usr/local/bin
 ORGNAME="18f"
 
-if git status | grep fatal; then
+if git status 2>&1 | grep fatal > /dev/null; then
   CURL=true
   cd /tmp || exit 1
   git clone https://github.com/18f/18f-cli
