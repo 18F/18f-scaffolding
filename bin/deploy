@@ -6,6 +6,21 @@ type cf >/dev/null 2>&1 || {
   exit 1
 }
 
+usage(){
+  echo -e "\nUsage:\n  18f deploy [options] <app name>\n"
+  echo "  Options:"
+  echo "  -h, --help               Display this help message"
+  echo "  -t, --timid              Confirm org and space settings before pushing"
+  echo "  -f, --force              Skip check for environment variables set outside of a UPS"
+  echo "  -d, --some-downtime      Perform a some-downtime deploy (default: zero-downtime)"
+  echo "  -m, --manifest           Specify a local manifest.yml instead of building from the app"
+  echo ""
+  echo "  If the app name is not unique:"
+  echo "  -o, --org                The organization to target"
+  echo "  -s, --space              The space in the organization to target"
+	echo ""
+}
+
 API="https://api.cloud.gov"
 
 # Check whether logged in
@@ -24,28 +39,8 @@ else
   OLD_SPACE=$(echo $CURRENT_TARGET | cut -d' ' -f12)
 fi
 
-usage(){
-  echo -e "\nUsage:\n  18f deploy [options] <arg>\n"
-  echo "Passing 'production' as the argument will look for manifest.yml in the current directory,"
-  echo "and push if it is found. Passing any other string will look for manifest-yourstring.yml and"
-  echo -e "use that file instead.\n"
-  echo "  Options:"
-  echo "  -h, --help               Display this help message"
-  echo "  -t, --timid              Confirm org and space settings before pushing"
-  echo "  -f, --force              Skip check for environment variables set outside of a UPS"
-  echo "  -d, --some-downtime      Perform a some-downtime deploy (default: zero-downtime)"
-	echo ""
-}
-
-get_org(){
-  #TODO: catch multiple apps with the same name and prompt for more info
-  CF_APP_DATA=$(cf curl "/v2/apps" -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.resources[] | select(.entity.name == "'${NAME}'")')
-  SPACE_URL=$(echo $CF_APP_DATA | jq '.entity.space_url' | tr -d '"')
-  CF_SPACE_DATA=$(cf curl "${SPACE_URL}" -X GET -H "Content-Type: application/x-www-form-urlencoded")
-  CF_SPACE=$(echo $CF_SPACE_DATA | jq '.entity.name' | tr -d '"')
-  ORG_URL=$(echo $CF_SPACE_DATA | jq '.entity.organization_url' | tr -d '"')
-  CF_ORG=$(cf curl ${ORG_URL} -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.entity.name'  | tr -d '"')
-}
+#TODO: consider using a single case statement, which would allow the argument to precede
+# the option flags
 
 # Convert known long options to short options
 for arg in "$@"; do
@@ -65,6 +60,15 @@ for arg in "$@"; do
     --force)
       set -- "$@" "-f"
       ;;
+    --manifest)
+      set -- "$@" "-m"
+      ;;
+    --org)
+      set -- "$@" "-o"
+      ;;
+    --space)
+      set -- "$@" "-s"
+      ;;
     *)
       set -- "$@" "$arg"
       ;;
@@ -75,7 +79,7 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts "hdt" opt; do
+while getopts "hdtmo:s:" opt; do
   case $opt in
     h )
       usage
@@ -90,15 +94,19 @@ while getopts "hdt" opt; do
     f )
       FORCE=true
       ;;
+    m )
+      MANIFEST=$OPTARG
+      MANUAL=true
+      ;;
+    o )
+      CF_ORG=$OPTARG
+      ;;
+    s )
+      CF_SPACE=$OPTARG
+      ;;
   esac
 done
 shift $((OPTIND -1))
-
-if [ $# -ne 1 ]; then
-  echo "Error: argument missing."
-  usage
-  exit 0
-fi
 
 # Check whether autopilot is installed for zero-downtime deploys
 if [[ ! $DOWNTIME ]]; then
@@ -110,28 +118,83 @@ if [[ ! $DOWNTIME ]]; then
   fi
 fi
 
-# Gather information from manifest
-if [[ $1 = "production" ]]; then
-  MANIFEST="manifest.yml"
-else
-  MANIFEST="manifest-${1}.yml"
-fi
-if [[ -e $MANIFEST ]]; then
-  NAME=$(cat $MANIFEST | grep name | cut -d':' -f2 | tr -d ' ')
-  get_org
-elif git status | grep -q "On"; then
-  while git status | grep -q "On"; do
-    cd ..
-    if [[ -e $MANIFEST ]]; then
-      NAME=$(cat $MANIFEST | grep name | cut -d':' -f2 | tr -d ' ')
-      get_org
-      break
-    fi
-  done
-else
-  echo -e "Error: can't locate ${MANIFEST}"
+if [ $# -ne 1 ]; then
+  echo "Error: please supply the app name"
   usage
-  exit 1
+  exit 0
+fi
+
+NAME=$1
+echo "Looking for the right org and space to push to"
+#TODO: catch multiple apps with the same name and prompt for more info
+if [[ ! $CF_SPACE ]]; then
+  CF_APP_DATA=$(cf curl "/v2/apps" -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.resources[] | select(.entity.name == "'${NAME}'")')
+  SPACE_URL=$(echo $CF_APP_DATA | jq '.entity.space_url' | tr -d '"')
+  CF_SPACE_DATA=$(cf curl "${SPACE_URL}" -X GET -H "Content-Type: application/x-www-form-urlencoded")
+  CF_SPACE=$(echo $CF_SPACE_DATA | jq '.entity.name' | tr -d '"')
+fi
+if [[ $CF_SPACE ]] && [[ ! $CF_ORG ]]; then
+  ORG_URL=$(echo $CF_SPACE_DATA | jq '.entity.organization_url' | tr -d '"')
+  CF_ORG=$(cf curl ${ORG_URL} -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.entity.name'  | tr -d '"')
+fi
+
+if [[ ! $MANIFEST ]]; then
+
+  #TODO: get app name, maybe from original manifest.yml?
+  #TODO: figure out the right space and org
+  echo "Creating an app manifest"
+  cf create-app-manifest $NAME -p 18f-deploy.yml > /dev/null
+  MANIFEST="18f-deploy.yml"
+
+  #TODO: create flags for these options
+  SHORTEN_VCAP=${SHORTEN_VCAP:-"false"}
+  UPPERCASE=${UPPERCASE:-"true"}
+
+  # Add user-provided variables as entries in yml env
+  echo "Gathering env vars from user-provided services"
+  VCAP_SERVICES=$(cf env $NAME | tr -d "\n" | awk -F"System-Provided:" '{$0=$2}1' | awk -F"{ \"VCAP_APPLICATION" '{$0=$1}1' | jq '.["VCAP_SERVICES"]')
+  # Find the number of user-provided services
+  LENGTH=$(echo $VCAP_SERVICES | jq '.["user-provided"] | length')
+  echo "Found $LENGTH services"
+  if [[ $LENGTH -gt 0 ]]; then
+    LENGTH=$(($LENGTH - 1))
+
+    for n in $(seq 0 $LENGTH); do
+      # The name of the service is nested in VCAP_SERVICES, so pull that out
+      SERVICE=$(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["name"]')
+      echo "Getting settings for $SERVICE"
+
+      # Create arrays for keys and values
+      # There may be a cleaner way to do this, but it works
+      KEYS=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"] | keys[]'))
+      VALUES=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"][]'))
+
+      if [[ "$UPPERCASE" == "true" ]]; then
+        # Convert all elements of KEYS array to uppercase
+        KEYS=( ${KEYS[@]^^} )
+        # SERVICE is not an array, so it can just be converted directly
+        SERVICE=${SERVICE^^}
+      fi
+
+      # Loop through the arrays in parallel and create export statements
+      COUNTER=0
+      while [ $COUNTER -lt  ${#KEYS[@]} ]; do
+        # shopt -s nocasematch # So that users can set true, True, or TRUE
+        if [[ "$SHORTEN_VCAP" == "true" ]]; then
+          ENV_VAR="${KEYS[$COUNTER]}=\: ${VALUES[$COUNTER]}"
+        else
+          # Dashes cause failures for bash variables, so convert them
+          ENV_VAR="${SERVICE//-/_}_${KEYS[$COUNTER]}: ${VALUES[$COUNTER]}"
+        fi
+        if cat 18f-deploy.yml | grep "env:" > /dev/null; then # If the "env" key already exists
+          sed -i '' "s/env:/env:\\`echo -e '\n\r'`    ${ENV_VAR}/" 18f-deploy.yml
+        else # Create the "env" key if there is none
+          echo "env:\n${ENV_VAR}" >> 18f-deploy.yml
+        fi
+        let COUNTER=COUNTER+1
+      done
+    done
+  fi
 fi
 
 # Point to the appropriate CF org and space
@@ -139,26 +202,37 @@ if [[ $TIMID ]]; then
   echo -n "Pushing to org ${CF_ORG} and space ${CF_SPACE}. Is that correct? [y/n] "
   read response
   if [[ $response =~ y(es)? ]]; then
-    cf target -o $CF_ORG -s $CF_SPACE
+    echo "Targeting space $CF_SPACE in org $CF_ORG"
+    cf target -o $CF_ORG -s $CF_SPACE > /dev/null
   else
     exit 0
   fi
 else
+  echo "Targeting space $CF_SPACE in org $CF_ORG"
   cf target -o $CF_ORG -s $CF_SPACE > /dev/null 2>&1
 fi
 
 # Check that no user-set environment variables will get lost in a zero-downtime deploy.
 # Since zero-downtime works by creating a new instance and then switching to it, environment
 # variables only persist if they are set by a User-Provided Service.
-if [[ $(echo $CF_APP_DATA | jq '.entity.environment_json | length') > 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
-  echo "The following environment variables will be lost! "
-  echo $CF_APP_DATA | jq '.entity.environment_json | keys[]'
-  echo -en "To keep them, set up a User-Provided Service and bind it to the app:\n http://docs.cloudfoundry.org/devguide/services/user-provided.html\nStill proceed with push? [y/n] "
-  read response
-  if [[ $response =~ y(es)? ]]; then
-    :
+if [[ $(echo $CF_APP_DATA | jq '.entity.environment_json | length') -gt 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
+  echo ""
+  if [[ $MANUAL ]]; then
+    echo "The following environment variables will be lost! "
+    echo $CF_APP_DATA | jq '.entity.environment_json | keys[]'
+    echo -en "To keep them, set up a User-Provided Service and bind it to the app:\n http://docs.cloudfoundry.org/devguide/services/user-provided.html\nStill proceed with push? [y/n] "
+    read response
+    if [[ $response =~ y(es)? ]]; then
+      :
+    else
+      exit 0
+    fi
   else
-    exit 0
+    echo "WARNING: The following environment variables are set manually!"
+    echo $CF_APP_DATA | jq '.entity.environment_json | keys[]'
+    echo "It's recommended set up a User-Provided Service and bind it to the app:"
+    echo "http://docs.cloudfoundry.org/devguide/services/user-provided.html"
+    echo "This will ensure that the variables aren't lost during a zero-downtime push"
   fi
 fi
 
@@ -177,6 +251,10 @@ else
 fi
 
 # Return to the previous state, if applicable
-if [[ -v $OLD_ORG ]] && [[ -v $OLD_SPACE ]]; then
+if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
+  echo "Returning to space $CF_SPACE in org $CF_ORG"
   cf target -o $OLD_ORG -s $OLD_SPACE > /dev/null 2>&1
 fi
+
+# Clean up
+rm 18f-deploy.yml
