@@ -41,7 +41,7 @@ done
 shift $((OPTIND -1))
 
 REMOTE=$(curl -s https://raw.githubusercontent.com/18f/18f-cli/release/VERSION)
-LOCAL=$(18f --version)
+LOCAL=$(18f --version | cut -d' ' -f2)
 
 if [[ "$REMOTE" != "$LOCAL" ]]; then
   curl -s https://raw.githubusercontent.com/18f/18f-cli/release/install | bash

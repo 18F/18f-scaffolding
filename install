@@ -3,7 +3,8 @@
 PREFIX=/usr/local/bin
 ORGNAME="18f"
 
-if git status 2>&1 | grep fatal > /dev/null; then
+#TODO: make sure we're in the RIGHT repo
+if git status 2>&1 | grep fatal > /dev/null || ! [[ $(git remote show -n origin | grep Fetch | cut -d':' -f2- | tr -d ' ') == "git@github.com:18F/18f-cli.git" ]]; then
   CURL=true
   cd /tmp || exit 1
   git clone https://github.com/18f/18f-cli
@@ -13,7 +14,11 @@ fi
 echo "Installing main $ORGNAME command"
 cp main $PREFIX/$ORGNAME
 
+# Create version script
+echo -e "#! /usr/bin/env bash\n\necho version $(cat VERSION)" >> bin/version
+
 cd bin || exit 1
+chmod +x *
 BINS=$(find *)
 for bin in $BINS; do
   echo "Installing $bin subcommand"
