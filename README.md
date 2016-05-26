@@ -48,6 +48,10 @@ Allows a variety of pre-configured scans to be run on a project. Currently suppo
 
 Downloads the 18F brand assets, either in whole or in part. Useful as a periodic check to keep assets up-to-date.
 
+### `18f upgrade`
+
+Upgrade the `18f` command to the latest version
+
 ### Extra scripts
 
 This repo also includes some scripts for standalone use, either in continuous integration services or on cloud.gov.
