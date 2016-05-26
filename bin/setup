@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+#TODO: convert exits to returns where it should continue on to another function
+
 usage(){
 	echo -e "\nUsage:\n  18f setup [options]\n"
   echo "  Options:"
@@ -8,12 +10,12 @@ usage(){
 	echo ""
 }
 
-setup(){
+laptop(){
   shopt -s nocasematch
   if [[ $SYSTEM =~ (osx|mac) ]]; then
     curl --silent --remote-name https://raw.githubusercontent.com/18F/laptop/master/mac
     echo "This uses the script found at https://github.com/18F/laptop/blob/master/mac"
-    echo -n "Ready to run the setup script? [y/n] "
+    echo -n "Ready to run the laptop script? [y/n] "
     read response
     if [[ $response =~ y(es)? ]]; then
       bash mac 2>&1 | tee ~/laptop.log
@@ -25,10 +27,93 @@ setup(){
   fi
 }
 
-if [[ $# -eq 0 ]]; then
-  usage
-  exit 1
-fi
+gpg(){
+	type keybase > /dev/null || {
+		echo "keybase is not installed; you can fix that with:"
+		echo "brew install keybase"
+		return 1
+	}
+
+	KEYBASE_STATUS=$(keybase status)
+	KEYBASE_USER=$(echo "$KEYBASE_STATUS" | grep Username | cut -d':' -f2 | tr -d ' ')
+	KEYBASE_LOGGED=$(echo "$KEYBASE_STATUS" | grep "Logged in" | cut -d':' -f2 | tr -d ' ')
+	if [[ $KEYBASE_LOGGED == "no" ]]; then
+		echo "keybase not logged in"
+		return 1
+	fi
+
+	echo -n "Logged in as $KEYBASE_USER: is this correct? [y/n] "
+	read response
+	if [[ ! $response =~ y(es)? ]]; then
+		echo "Please log in as the correct user"
+		return 0
+	fi
+
+	#TODO: check for existing key
+	echo "Checking for existing keys"
+	if gpg -k gsa.gov; then
+		GSA_KEYLOCAL=true
+	fi
+	if keybase pgp list | grep gsa.gov; then
+		GSA_KEYBASE=true
+	fi
+
+	if [[ $GSA_KEYLOCAL ]] && [[ $GSA_KEYBASE ]]; then
+		echo "You already have a PGP key set up for your @gsa.gov address"
+		return 0
+	elif [[ $GSA_KEYLOCAL ]] && [[ ! $GSA_KEYBASE ]]; then
+		echo "You have a PGP key for your @gsa.gov address, but it isn't on keybase"
+		echo "This will not export your private key to keybase, although you may do that later"
+		echo "if you are aware of the risks and wish to manage your keys across devices"
+		echo -n "Would you like to add the key to your keybase profile?"
+		read response
+		if [[ $response =~ y(es)? ]]; then
+			echo "Adding your public key to keybase"
+			gpg -a --export gsa.gov | keybase pgp import
+			keybase pgp update
+		fi
+		return 0
+	else
+		#TODO: offer to create key
+		#TODO: fill out pgp gen information for user
+		echo "Creating a new key for your @gsa.gov address..."
+		keybase pgp gen
+		# http://stackoverflow.com/questions/2500436/how-does-cat-eof-work-in-bash
+	fi
+
+	echo "Setting key as global commit signing key"
+	git config --global user.signingkey "$(gpg --keyid-format SHORT -k gsa.gov | grep ^pub | cut -d'/' -f2 | cut -d' ' -f1)"
+	git config --global commit.gpgsign true
+
+	#TODO: help with setup on GitHub
+	echo "Now you'll need to add the key to GitHub, following these instructions:"
+	echo "https://help.github.com/articles/adding-a-new-gpg-key-to-your-github-account/"
+	# https://developer.github.com/v3/users/gpg_keys/#create-a-gpg-key
+	# https://developer.github.com/v3/auth/
+}
+
+clouddotgov(){
+	type cf > /dev/null || {
+		echo "cf is not installed; you can fix that with:"
+		echo "brew tap cloudfoundry/tap && brew install cf-cli"
+		return 1
+	}
+
+	#TODO: login via API
+	cf login -a api.cloud.gov
+}
+
+github(){
+	# https://help.github.com/articles/testing-your-ssh-connection/
+	if ! ssh -T git@github.com 2>&1 | grep "success"; then
+		echo "No SSH key is set up for GitHub"
+	fi
+}
+
+# if [[ $# -eq 0 ]]; then
+#   usage
+#   exit 1
+# fi
 
 # Convert known long options to short options
 for arg in "$@"; do
@@ -52,7 +137,7 @@ while getopts ":hs:" opt; do
 			;;
     s )
       SYSTEM=$OPTARG
-      setup
+      laptop
       ;;
 		\? )
 			echo "Unrecognized option: -$OPTARG\n"
@@ -67,3 +152,12 @@ while getopts ":hs:" opt; do
 	esac
 done
 shift $((OPTIND -1))
+
+
+# TODO: give option for laptop, cloud.gov, or gpg
+
+echo "Hi there! Let's get things set up."
+laptop
+gpg
+clouddotgov
+github
