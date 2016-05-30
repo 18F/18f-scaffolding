@@ -164,36 +164,71 @@ if [[ ! $MANIFEST ]]; then
       SERVICE=$(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["name"]')
       echo "Getting settings for $SERVICE"
 
-      # Create arrays for keys and values
-      # There may be a cleaner way to do this, but it works
-      KEYS=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"] | keys[]'))
-      VALUES=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"][]'))
+      # Find out how many keys are in this service
+      KEYS_LENGTH=$(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"] | keys | length')
 
-      if [[ "$UPPERCASE" == "true" ]]; then
-        # Convert all elements of KEYS array to uppercase
-        KEYS=( ${KEYS[@]^^} )
-        # SERVICE is not an array, so it can just be converted directly
-        SERVICE=${SERVICE^^}
-      fi
+      # Get each key-value pair and create an export statement
+      KEYS_LENGTH=$(($KEYS_LENGTH - 1))
+      for i in $(seq 0 $KEYS_LENGTH); do
+        KEY="$(echo $VCAP_SERVICES | jq -r --argjson n $n --argjson i $i '.["user-provided"][$n]["credentials"] | keys[$i]')"
+        VALUE="$(echo $VCAP_SERVICES | jq -r --argjson n $n --arg key $KEY '.["user-provided"][$n]["credentials"][$key]')"
 
-      # Loop through the arrays in parallel and create export statements
-      COUNTER=0
-      while [ $COUNTER -lt  ${#KEYS[@]} ]; do
-        # shopt -s nocasematch # So that users can set true, True, or TRUE
+        if [[ "$UPPERCASE" == "true" ]]; then
+          # Convert KEY and SERVICE to uppercase
+          KEY=${KEY^^}
+          SERVICE=${SERVICE^^}
+        fi
+
+        echo $SERVICE $KEY $VALUE
+        # Create export statements
         if [[ "$SHORTEN_VCAP" == "true" ]]; then
-          ENV_VAR="${KEYS[$COUNTER]}=\: ${VALUES[$COUNTER]}"
+          ENV_VAR="${KEY}=\: ${VALUE}"
         else
           # Dashes cause failures for bash variables, so convert them
-          ENV_VAR="${SERVICE//-/_}_${KEYS[$COUNTER]}: ${VALUES[$COUNTER]}"
+          ENV_VAR="${SERVICE//-/_}_${KEY}: ${VALUE}"
         fi
         if cat 18f-deploy.yml | grep "env:" > /dev/null; then # If the "env" key already exists
           sed -i '' "s/env:/env:\\`echo -e '\n\r'`    ${ENV_VAR}/" 18f-deploy.yml
         else # Create the "env" key if there is none
           echo "env:\n${ENV_VAR}" >> 18f-deploy.yml
         fi
-        let COUNTER=COUNTER+1
       done
     done
+    # for n in $(seq 0 $LENGTH); do
+    #   # The name of the service is nested in VCAP_SERVICES, so pull that out
+    #   SERVICE=$(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["name"]')
+    #   echo "Getting settings for $SERVICE"
+    #
+    #   # Create arrays for keys and values
+    #   # There may be a cleaner way to do this, but it works
+    #   KEYS=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"] | keys[]'))
+    #   VALUES=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"][]'))
+    #
+    #   if [[ "$UPPERCASE" == "true" ]]; then
+    #     # Convert all elements of KEYS array to uppercase
+    #     KEYS=( ${KEYS[@]^^} )
+    #     # SERVICE is not an array, so it can just be converted directly
+    #     SERVICE=${SERVICE^^}
+    #   fi
+    #
+    #   # Loop through the arrays in parallel and create export statements
+    #   COUNTER=0
+    #   while [ $COUNTER -lt  ${#KEYS[@]} ]; do
+    #     # shopt -s nocasematch # So that users can set true, True, or TRUE
+    #     if [[ "$SHORTEN_VCAP" == "true" ]]; then
+    #       ENV_VAR="${KEYS[$COUNTER]}=\: ${VALUES[$COUNTER]}"
+    #     else
+    #       # Dashes cause failures for bash variables, so convert them
+    #       ENV_VAR="${SERVICE//-/_}_${KEYS[$COUNTER]}: ${VALUES[$COUNTER]}"
+    #     fi
+    #     if cat 18f-deploy.yml | grep "env:" > /dev/null; then # If the "env" key already exists
+    #       sed -i '' "s/env:/env:\\`echo -e '\n\r'`    ${ENV_VAR}/" 18f-deploy.yml
+    #     else # Create the "env" key if there is none
+    #       echo "env:\n${ENV_VAR}" >> 18f-deploy.yml
+    #     fi
+    #     let COUNTER=COUNTER+1
+    #   done
+    # done
   fi
 fi
 
@@ -244,11 +279,11 @@ if [[ -n $LATEST_COMMIT ]]; then
 fi
 
 # Push the app
-if [[ ! $DOWNTIME ]]; then
-  cf zero-downtime-push $NAME -f $MANIFEST
-else
-  cf push -f $MANIFEST
-fi
+# if [[ ! $DOWNTIME ]]; then
+#   cf zero-downtime-push $NAME -f $MANIFEST
+# else
+#   cf push -f $MANIFEST
+# fi
 
 # Return to the previous state, if applicable
 if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
@@ -257,4 +292,4 @@ if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
 fi
 
 # Clean up
-rm 18f-deploy.yml
+# rm 18f-deploy.yml
