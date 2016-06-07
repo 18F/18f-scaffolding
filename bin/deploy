@@ -137,6 +137,22 @@ if [[ $CF_SPACE ]] && [[ ! $CF_ORG ]]; then
   ORG_URL=$(echo $CF_SPACE_DATA | jq '.entity.organization_url' | tr -d '"')
   CF_ORG=$(cf curl ${ORG_URL} -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.entity.name'  | tr -d '"')
 fi
+echo "Using space $CF_SPACE in org $CF_ORG"
+
+# Point to the appropriate CF org and space
+if [[ $TIMID ]]; then
+  echo -n "Pushing to org ${CF_ORG} and space ${CF_SPACE}. Is that correct? [y/n] "
+  read response
+  if [[ $response =~ y(es)? ]]; then
+    echo "Targeting space $CF_SPACE in org $CF_ORG"
+    cf target -o $CF_ORG -s $CF_SPACE > /dev/null
+  else
+    exit 0
+  fi
+else
+  echo "Targeting space $CF_SPACE in org $CF_ORG"
+  cf target -o $CF_ORG -s $CF_SPACE > /dev/null 2>&1
+fi
 
 if [[ ! $MANIFEST ]]; then
 
@@ -232,21 +248,6 @@ if [[ ! $MANIFEST ]]; then
   fi
 fi
 
-# Point to the appropriate CF org and space
-if [[ $TIMID ]]; then
-  echo -n "Pushing to org ${CF_ORG} and space ${CF_SPACE}. Is that correct? [y/n] "
-  read response
-  if [[ $response =~ y(es)? ]]; then
-    echo "Targeting space $CF_SPACE in org $CF_ORG"
-    cf target -o $CF_ORG -s $CF_SPACE > /dev/null
-  else
-    exit 0
-  fi
-else
-  echo "Targeting space $CF_SPACE in org $CF_ORG"
-  cf target -o $CF_ORG -s $CF_SPACE > /dev/null 2>&1
-fi
-
 # Check that no user-set environment variables will get lost in a zero-downtime deploy.
 # Since zero-downtime works by creating a new instance and then switching to it, environment
 # variables only persist if they are set by a User-Provided Service.
@@ -279,11 +280,11 @@ if [[ -n $LATEST_COMMIT ]]; then
 fi
 
 # Push the app
-# if [[ ! $DOWNTIME ]]; then
-#   cf zero-downtime-push $NAME -f $MANIFEST
-# else
-#   cf push -f $MANIFEST
-# fi
+if [[ ! $DOWNTIME ]]; then
+  cf zero-downtime-push $NAME -f $MANIFEST
+else
+  cf push -f $MANIFEST
+fi
 
 # Return to the previous state, if applicable
 if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
@@ -292,4 +293,4 @@ if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
 fi
 
 # Clean up
-# rm 18f-deploy.yml
+rm 18f-deploy.yml
