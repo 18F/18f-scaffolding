@@ -279,11 +279,11 @@ if [[ -n $LATEST_COMMIT ]]; then
 fi
 
 # Push the app
-# if [[ ! $DOWNTIME ]]; then
-#   cf zero-downtime-push $NAME -f $MANIFEST
-# else
-#   cf push -f $MANIFEST
-# fi
+if [[ ! $DOWNTIME ]]; then
+  cf zero-downtime-push $NAME -f $MANIFEST
+else
+  cf push -f $MANIFEST
+fi
 
 # Return to the previous state, if applicable
 if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
