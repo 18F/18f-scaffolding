@@ -129,7 +129,15 @@ echo "Looking for the right org and space to push to"
 #TODO: catch multiple apps with the same name and prompt for more info
 if [[ ! $CF_SPACE ]]; then
   CF_APP_DATA=$(cf curl "/v2/apps" -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.resources[] | select(.entity.name == "'${NAME}'")')
+  if [[ $(echo $CF_APP_DATA | wc -w) -gt 1 ]]; then
+    echo "You have access to multiple apps with that name! Ensure that the app names are unique and try again"
+    exit 1
+  fi
   SPACE_URL=$(echo $CF_APP_DATA | jq '.entity.space_url' | tr -d '"')
+  if [[ $SPACE_URL == "null" ]]; then
+    echo "No app named ${NAME} found! Check the application name and try again"
+    exit 1
+  fi
   CF_SPACE_DATA=$(cf curl "${SPACE_URL}" -X GET -H "Content-Type: application/x-www-form-urlencoded")
   CF_SPACE=$(echo $CF_SPACE_DATA | jq '.entity.name' | tr -d '"')
 fi
@@ -251,7 +259,7 @@ fi
 # Check that no user-set environment variables will get lost in a zero-downtime deploy.
 # Since zero-downtime works by creating a new instance and then switching to it, environment
 # variables only persist if they are set by a User-Provided Service.
-if [[ $(echo $CF_APP_DATA | jq '.entity.environment_json | length') -gt 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
+if [[ $(echo $CF_APP_DATA | jq --raw-output '.entity.environment_json | length') -gt 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
   echo ""
   if [[ $MANUAL ]]; then
     echo "The following environment variables will be lost! "
