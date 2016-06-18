@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+
+H=$(tput lines)
+W=$(tput cols)
+
+clear
+for n in $(seq 0 1000); do
+  tput cup $((1 + RANDOM % $H)) $((1 + RANDOM % $W))
+  echo "ALAN!"
+done
+tput cup $H 0
