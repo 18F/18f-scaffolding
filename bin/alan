@@ -38,7 +38,6 @@ while getopts "hn:" opt; do
     n )
       if [[ $OPTARG -gt 0 ]]; then
         NUMBER=$OPTARG
-        echo $NUMBER
       else
         echo "Enter a number above 0"
         exit 1
@@ -52,7 +51,7 @@ H=$(( $(tput lines) - 3 ))
 W=$(tput cols)
 
 clear
-for n in $(seq 0 $NUMBER); do
+for _ in $(seq 0 $NUMBER); do
   tput cup $((1 + $RANDOM % $H)) $((1 + $RANDOM % $W))
   echo "ALAN!"
 done
