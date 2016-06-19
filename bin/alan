@@ -1,11 +1,44 @@
 #! /usr/bin/env bash
 
-H=$(tput lines)
+usage(){
+  echo -e "\nUsage:\n  18f alan [options]\n"
+  echo "  Options:"
+  echo "  -h, --help               Display this help message"
+}
+
+# Convert known long options to short options
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    --help)
+      set -- "$@" "-h"
+      ;;
+    *)
+      set -- "$@" "$arg"
+      ;;
+  esac
+done
+
+# Reset to beginning of arguments
+OPTIND=1
+
+# Process option flags
+while getopts "hdtmo:s:" opt; do
+  case $opt in
+    h )
+      usage
+      exit 0
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+H=$(( $(tput lines) - 3 ))
 W=$(tput cols)
 
 clear
-for n in $(seq 0 1000); do
-  tput cup $((1 + RANDOM % $H)) $((1 + RANDOM % $W))
+for n in $(seq 0 2000); do
+  tput cup $((1 + $RANDOM % $H)) $((1 + $RANDOM % $W))
   echo "ALAN!"
 done
 tput cup $H 0
