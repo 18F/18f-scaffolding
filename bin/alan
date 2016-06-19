@@ -4,7 +4,10 @@ usage(){
   echo -e "\nUsage:\n  18f alan [options]\n"
   echo "  Options:"
   echo "  -h, --help               Display this help message"
+  echo "  -n, --number             How many Alans"
 }
+
+NUMBER=2000
 
 # Convert known long options to short options
 for arg in "$@"; do
@@ -12,6 +15,9 @@ for arg in "$@"; do
   case "$arg" in
     --help)
       set -- "$@" "-h"
+      ;;
+    --number)
+      set -- "$@" "-n"
       ;;
     *)
       set -- "$@" "$arg"
@@ -23,11 +29,20 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts "hdtmo:s:" opt; do
+while getopts "hn:" opt; do
   case $opt in
     h )
       usage
       exit 0
+      ;;
+    n )
+      if [[ $OPTARG -gt 0 ]]; then
+        NUMBER=$OPTARG
+        echo $NUMBER
+      else
+        echo "Enter a number above 0"
+        exit 1
+      fi
       ;;
   esac
 done
@@ -37,7 +52,7 @@ H=$(( $(tput lines) - 3 ))
 W=$(tput cols)
 
 clear
-for n in $(seq 0 2000); do
+for n in $(seq 0 $NUMBER); do
   tput cup $((1 + $RANDOM % $H)) $((1 + $RANDOM % $W))
   echo "ALAN!"
 done
