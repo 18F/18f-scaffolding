@@ -14,6 +14,7 @@ usage(){
   echo "  -f, --force              Skip check for environment variables set outside of a UPS"
   echo "  -d, --some-downtime      Perform a some-downtime deploy (default: zero-downtime)"
   echo "  -m, --manifest           Specify a local manifest.yml instead of building from the app"
+  echo "  -n, --new                Create a new app rather than searching for an app to update"
   echo ""
   echo "  If the app name is not unique:"
   echo "  -o, --org                The organization to target"
@@ -63,6 +64,9 @@ for arg in "$@"; do
     --manifest)
       set -- "$@" "-m"
       ;;
+    --new)
+      set -- "$@" "-n"
+      ;;
     --org)
       set -- "$@" "-o"
       ;;
@@ -98,6 +102,9 @@ while getopts "hdtmo:s:" opt; do
       MANIFEST=$OPTARG
       MANUAL=true
       ;;
+    n )
+      NEW=true
+      ;;
     o )
       CF_ORG=$OPTARG
       ;;
@@ -125,11 +132,28 @@ if [ $# -ne 1 ]; then
 fi
 
 NAME=$1
-echo "Looking for the right org and space to push to"
-#TODO: catch multiple apps with the same name and prompt for more info
-if [[ ! $CF_SPACE ]]; then
+if [[ $NEW ]]; then
+  if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]] || [[ ! $MANIFEST ]]; then
+    echo "For new deployments, you must set an org, space, and manifest"
+    exit 1
+  fi
+fi
+
+echo "Looking for the right org and space to deploy to"
+if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]]; then
   CF_APP_DATA=$(cf curl "/v2/apps" -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.resources[] | select(.entity.name == "'${NAME}'")')
+  if [[ $(echo $CF_APP_DATA | wc -w) -gt 1 ]]; then
+    echo "You have access to multiple apps with that name! Ensure that the app names are unique and try again"
+    exit 1
+  fi
+fi
+if [[ ! $CF_SPACE ]]; then
   SPACE_URL=$(echo $CF_APP_DATA | jq '.entity.space_url' | tr -d '"')
+  if [[ $SPACE_URL == "null" ]] && [[ ! $NEW ]]; then
+    echo "No app named ${NAME} found! Check the application name and try again"
+    echo "If you are deploying a new app, use the --new flag"
+    exit 1
+  fi
   CF_SPACE_DATA=$(cf curl "${SPACE_URL}" -X GET -H "Content-Type: application/x-www-form-urlencoded")
   CF_SPACE=$(echo $CF_SPACE_DATA | jq '.entity.name' | tr -d '"')
 fi
@@ -210,48 +234,13 @@ if [[ ! $MANIFEST ]]; then
         fi
       done
     done
-    # for n in $(seq 0 $LENGTH); do
-    #   # The name of the service is nested in VCAP_SERVICES, so pull that out
-    #   SERVICE=$(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["name"]')
-    #   echo "Getting settings for $SERVICE"
-    #
-    #   # Create arrays for keys and values
-    #   # There may be a cleaner way to do this, but it works
-    #   KEYS=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"] | keys[]'))
-    #   VALUES=($(echo $VCAP_SERVICES | jq -r --argjson n $n '.["user-provided"][$n]["credentials"][]'))
-    #
-    #   if [[ "$UPPERCASE" == "true" ]]; then
-    #     # Convert all elements of KEYS array to uppercase
-    #     KEYS=( ${KEYS[@]^^} )
-    #     # SERVICE is not an array, so it can just be converted directly
-    #     SERVICE=${SERVICE^^}
-    #   fi
-    #
-    #   # Loop through the arrays in parallel and create export statements
-    #   COUNTER=0
-    #   while [ $COUNTER -lt  ${#KEYS[@]} ]; do
-    #     # shopt -s nocasematch # So that users can set true, True, or TRUE
-    #     if [[ "$SHORTEN_VCAP" == "true" ]]; then
-    #       ENV_VAR="${KEYS[$COUNTER]}=\: ${VALUES[$COUNTER]}"
-    #     else
-    #       # Dashes cause failures for bash variables, so convert them
-    #       ENV_VAR="${SERVICE//-/_}_${KEYS[$COUNTER]}: ${VALUES[$COUNTER]}"
-    #     fi
-    #     if cat 18f-deploy.yml | grep "env:" > /dev/null; then # If the "env" key already exists
-    #       sed -i '' "s/env:/env:\\`echo -e '\n\r'`    ${ENV_VAR}/" 18f-deploy.yml
-    #     else # Create the "env" key if there is none
-    #       echo "env:\n${ENV_VAR}" >> 18f-deploy.yml
-    #     fi
-    #     let COUNTER=COUNTER+1
-    #   done
-    # done
   fi
 fi
 
 # Check that no user-set environment variables will get lost in a zero-downtime deploy.
 # Since zero-downtime works by creating a new instance and then switching to it, environment
 # variables only persist if they are set by a User-Provided Service.
-if [[ $(echo $CF_APP_DATA | jq '.entity.environment_json | length') -gt 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
+if [[ $(echo $CF_APP_DATA | jq --raw-output '.entity.environment_json | length') -gt 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
   echo ""
   if [[ $MANUAL ]]; then
     echo "The following environment variables will be lost! "
