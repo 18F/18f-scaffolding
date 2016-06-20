@@ -48,11 +48,11 @@ done
 shift $((OPTIND -1))
 
 H=$(( $(tput lines) - 3 ))
-W=$(tput cols)
+W=$(( $(tput cols) - 4 ))
 
 clear
 for _ in $(seq 0 $NUMBER); do
-  tput cup $((1 + $RANDOM % $H)) $((1 + $RANDOM % $W))
+  tput cup $(($RANDOM % $H)) $(($RANDOM % $W))
   echo "ALAN!"
 done
 tput cup $H 0
