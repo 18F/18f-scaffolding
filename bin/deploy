@@ -142,13 +142,13 @@ fi
 echo "Looking for the right org and space to deploy to"
 if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]]; then
   CF_APP_DATA=$(cf curl "/v2/apps" -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.resources[] | select(.entity.name == "'${NAME}'")')
-  if [[ $(echo $CF_APP_DATA | wc -w) -gt 1 ]]; then
-    echo "You have access to multiple apps with that name! Ensure that the app names are unique and try again"
-    exit 1
-  fi
 fi
 if [[ ! $CF_SPACE ]]; then
   SPACE_URL=$(echo $CF_APP_DATA | jq '.entity.space_url' | tr -d '"')
+  if [[ $(echo $SPACE_URL | wc -w) -gt 1 ]]; then
+    echo "You have access to multiple apps with that name! Ensure that the app names are unique and try again"
+    exit 1
+  fi
   if [[ $SPACE_URL == "null" ]] && [[ ! $NEW ]]; then
     echo "No app named ${NAME} found! Check the application name and try again"
     echo "If you are deploying a new app, use the --new flag"
@@ -219,7 +219,6 @@ if [[ ! $MANIFEST ]]; then
           SERVICE=${SERVICE^^}
         fi
 
-        echo $SERVICE $KEY $VALUE
         # Create export statements
         if [[ "$SHORTEN_VCAP" == "true" ]]; then
           ENV_VAR="${KEY}=\: ${VALUE}"
@@ -228,7 +227,7 @@ if [[ ! $MANIFEST ]]; then
           ENV_VAR="${SERVICE//-/_}_${KEY}: ${VALUE}"
         fi
         if cat 18f-deploy.yml | grep "env:" > /dev/null; then # If the "env" key already exists
-          sed -i '' "s/env:/env:\\`echo -e '\n\r'`    ${ENV_VAR}/" 18f-deploy.yml
+          sed -i '' "s/  env:/env:\\`echo -e '\r'`    ${ENV_VAR}/" 18f-deploy.yml
         else # Create the "env" key if there is none
           echo "env:\n${ENV_VAR}" >> 18f-deploy.yml
         fi
@@ -282,4 +281,4 @@ if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
 fi
 
 # Clean up
-rm 18f-deploy.yml
+# rm 18f-deploy.yml
