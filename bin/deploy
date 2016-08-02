@@ -14,6 +14,7 @@ usage(){
   echo "  -f, --force              Skip check for environment variables set outside of a UPS"
   echo "  -d, --some-downtime      Perform a some-downtime deploy (default: zero-downtime)"
   echo "  -m, --manifest           Specify a local manifest.yml instead of building from the app"
+  echo "  -c, --clean              Do not pull environment variables from the running app"
   echo "  -n, --new                Create a new app rather than searching for an app to update"
   echo ""
   echo "  If the app name is not unique:"
@@ -83,7 +84,7 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts "hdtmo:s:" opt; do
+while getopts "hdtmo:s:cn" opt; do
   case $opt in
     h )
       usage
@@ -99,8 +100,10 @@ while getopts "hdtmo:s:" opt; do
       FORCE=true
       ;;
     m )
-      MANIFEST=$OPTARG
-      MANUAL=true
+      ORIGINAL=$OPTARG
+      ;;
+    c )
+      CLEAN=true
       ;;
     n )
       NEW=true
@@ -133,7 +136,7 @@ fi
 
 NAME=$1
 if [[ $NEW ]]; then
-  if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]] || [[ ! $MANIFEST ]]; then
+  if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]] || [[ ! $ORIGINAL ]]; then
     echo "For new deployments, you must set an org, space, and manifest"
     exit 1
   fi
@@ -178,14 +181,19 @@ else
   cf target -o $CF_ORG -s $CF_SPACE > /dev/null 2>&1
 fi
 
-if [[ ! $MANIFEST ]]; then
 
-  #TODO: get app name, maybe from original manifest.yml?
-  #TODO: figure out the right space and org
+#TODO: get app name, maybe from original manifest.yml?
+#TODO: figure out the right space and org
+if [[ $ORIGINAL ]]; then
+  echo "Copying $ORIGINAL to a temporary manifest for deploy"
+  cp "$ORIGINAL" 18f-deploy.yml
+else
   echo "Creating an app manifest"
   cf create-app-manifest $NAME -p 18f-deploy.yml > /dev/null
-  MANIFEST="18f-deploy.yml"
+fi
+MANIFEST="18f-deploy.yml"
 
+if [[ ! $CLEAN ]]; then
   #TODO: create flags for these options
   SHORTEN_VCAP=${SHORTEN_VCAP:-"false"}
   UPPERCASE=${UPPERCASE:-"true"}
@@ -241,7 +249,7 @@ fi
 # variables only persist if they are set by a User-Provided Service.
 if [[ $(echo $CF_APP_DATA | jq --raw-output '.entity.environment_json | length') -gt 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
   echo ""
-  if [[ $MANUAL ]]; then
+  if [[ $CLEAN ]]; then
     echo "The following environment variables will be lost! "
     echo $CF_APP_DATA | jq '.entity.environment_json | keys[]'
     echo -en "To keep them, set up a User-Provided Service and bind it to the app:\n http://docs.cloudfoundry.org/devguide/services/user-provided.html\nStill proceed with push? [y/n] "
@@ -281,4 +289,4 @@ if [[ -n $OLD_ORG ]] && [[ -n $OLD_SPACE ]]; then
 fi
 
 # Clean up
-# rm 18f-deploy.yml
+rm 18f-deploy.yml
