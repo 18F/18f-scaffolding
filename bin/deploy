@@ -6,6 +6,19 @@ type cf >/dev/null 2>&1 || {
   exit 1
 }
 
+if [[ $(bc <<< "$(jq --version | cut -d'-' -f2)>=1.5") -ne 1 ]]; then
+  if [[ $TRAVIS ]]; then
+    mkdir /tmp/jq-1.5
+    wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /tmp/jq-1.5/jq
+    chmod +x /tmp/jq-1.5/jq
+    export PATH=/tmp/jq-1.5:$PATH
+  else
+    echo " ERROR: jq is not installed or is below version 1.5"
+    echo " please update jq"
+    exit 1
+  fi
+fi
+
 usage(){
   echo -e "\nUsage:\n  18f deploy [options] <app name>\n"
   echo "  Options:"
