@@ -6,6 +6,19 @@ type cf >/dev/null 2>&1 || {
   exit 1
 }
 
+if [[ $(bc <<< "$(jq --version | cut -d'-' -f2)>=1.5") -ne 1 ]]; then
+  if [[ $TRAVIS ]]; then
+    mkdir /tmp/jq-1.5
+    wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O /tmp/jq-1.5/jq
+    chmod +x /tmp/jq-1.5/jq
+    export PATH=/tmp/jq-1.5:$PATH
+  else
+    echo " ERROR: jq is not installed or is below version 1.5"
+    echo " please update jq"
+    exit 1
+  fi
+fi
+
 usage(){
   echo -e "\nUsage:\n  18f deploy [options] <app name>\n"
   echo "  Options:"
@@ -14,6 +27,7 @@ usage(){
   echo "  -f, --force              Skip check for environment variables set outside of a UPS"
   echo "  -d, --some-downtime      Perform a some-downtime deploy (default: zero-downtime)"
   echo "  -m, --manifest           Specify a local manifest.yml instead of building from the app"
+  echo "  -c, --clean              Do not pull environment variables from the running app"
   echo "  -n, --new                Create a new app rather than searching for an app to update"
   echo ""
   echo "  If the app name is not unique:"
@@ -83,7 +97,7 @@ done
 OPTIND=1
 
 # Process option flags
-while getopts "hdtmo:s:" opt; do
+while getopts "hdtmo:s:cn" opt; do
   case $opt in
     h )
       usage
@@ -99,8 +113,10 @@ while getopts "hdtmo:s:" opt; do
       FORCE=true
       ;;
     m )
-      MANIFEST=$OPTARG
-      MANUAL=true
+      ORIGINAL=$OPTARG
+      ;;
+    c )
+      CLEAN=true
       ;;
     n )
       NEW=true
@@ -133,7 +149,7 @@ fi
 
 NAME=$1
 if [[ $NEW ]]; then
-  if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]] || [[ ! $MANIFEST ]]; then
+  if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]] || [[ ! $ORIGINAL ]]; then
     echo "For new deployments, you must set an org, space, and manifest"
     exit 1
   fi
@@ -142,13 +158,13 @@ fi
 echo "Looking for the right org and space to deploy to"
 if [[ ! $CF_ORG ]] || [[ ! $CF_SPACE ]]; then
   CF_APP_DATA=$(cf curl "/v2/apps" -X GET -H "Content-Type: application/x-www-form-urlencoded" | jq '.resources[] | select(.entity.name == "'${NAME}'")')
-  if [[ $(echo $CF_APP_DATA | wc -w) -gt 1 ]]; then
-    echo "You have access to multiple apps with that name! Ensure that the app names are unique and try again"
-    exit 1
-  fi
 fi
 if [[ ! $CF_SPACE ]]; then
   SPACE_URL=$(echo $CF_APP_DATA | jq '.entity.space_url' | tr -d '"')
+  if [[ $(echo $SPACE_URL | wc -w) -gt 1 ]]; then
+    echo "You have access to multiple apps with that name! Ensure that the app names are unique and try again"
+    exit 1
+  fi
   if [[ $SPACE_URL == "null" ]] && [[ ! $NEW ]]; then
     echo "No app named ${NAME} found! Check the application name and try again"
     echo "If you are deploying a new app, use the --new flag"
@@ -178,14 +194,19 @@ else
   cf target -o $CF_ORG -s $CF_SPACE > /dev/null 2>&1
 fi
 
-if [[ ! $MANIFEST ]]; then
 
-  #TODO: get app name, maybe from original manifest.yml?
-  #TODO: figure out the right space and org
+#TODO: get app name, maybe from original manifest.yml?
+#TODO: figure out the right space and org
+if [[ $ORIGINAL ]]; then
+  echo "Copying $ORIGINAL to a temporary manifest for deploy"
+  cp "$ORIGINAL" 18f-deploy.yml
+else
   echo "Creating an app manifest"
   cf create-app-manifest $NAME -p 18f-deploy.yml > /dev/null
-  MANIFEST="18f-deploy.yml"
+fi
+MANIFEST="18f-deploy.yml"
 
+if [[ ! $CLEAN ]]; then
   #TODO: create flags for these options
   SHORTEN_VCAP=${SHORTEN_VCAP:-"false"}
   UPPERCASE=${UPPERCASE:-"true"}
@@ -219,7 +240,6 @@ if [[ ! $MANIFEST ]]; then
           SERVICE=${SERVICE^^}
         fi
 
-        echo $SERVICE $KEY $VALUE
         # Create export statements
         if [[ "$SHORTEN_VCAP" == "true" ]]; then
           ENV_VAR="${KEY}=\: ${VALUE}"
@@ -228,7 +248,7 @@ if [[ ! $MANIFEST ]]; then
           ENV_VAR="${SERVICE//-/_}_${KEY}: ${VALUE}"
         fi
         if cat 18f-deploy.yml | grep "env:" > /dev/null; then # If the "env" key already exists
-          sed -i '' "s/env:/env:\\`echo -e '\n\r'`    ${ENV_VAR}/" 18f-deploy.yml
+          sed -i '' "s/  env:/env:\\`echo -e '\r'`    ${ENV_VAR}/" 18f-deploy.yml
         else # Create the "env" key if there is none
           echo "env:\n${ENV_VAR}" >> 18f-deploy.yml
         fi
@@ -242,7 +262,7 @@ fi
 # variables only persist if they are set by a User-Provided Service.
 if [[ $(echo $CF_APP_DATA | jq --raw-output '.entity.environment_json | length') -gt 0 ]] && [[ ! $DOWNTIME ]] && [[ ! $FORCE ]]; then
   echo ""
-  if [[ $MANUAL ]]; then
+  if [[ $CLEAN ]]; then
     echo "The following environment variables will be lost! "
     echo $CF_APP_DATA | jq '.entity.environment_json | keys[]'
     echo -en "To keep them, set up a User-Provided Service and bind it to the app:\n http://docs.cloudfoundry.org/devguide/services/user-provided.html\nStill proceed with push? [y/n] "
