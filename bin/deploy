@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
 
+echo "this is currently offline for reasons"
+echo "please use another deployment method"
+exit 0
+
 type cf >/dev/null 2>&1 || {
   echo " ERROR: cf not found:"
   echo " please install cf"
@@ -205,6 +209,7 @@ else
   cf create-app-manifest $NAME -p 18f-deploy.yml > /dev/null
 fi
 MANIFEST="18f-deploy.yml"
+cat 18f-deploy.yml
 
 if [[ ! $CLEAN ]]; then
   #TODO: create flags for these options
@@ -287,6 +292,8 @@ if [[ -n $LATEST_COMMIT ]]; then
   git rev-parse --abbrev-ref HEAD > $LATEST_COMMIT
   git rev-parse HEAD >> $LATEST_COMMIT
 fi
+
+cat 18f-deploy.yml
 
 # Push the app
 if [[ ! $DOWNTIME ]]; then
