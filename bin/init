@@ -159,9 +159,6 @@ else
   done
 fi
 
-# Establish git branches
-git checkout -b develop >/dev/null 2>&1
-
 # Create initial .about.yml
 if [[ ! -e .about.yml ]] || [[ $FORCE ]]; then
   echo " Initializing .about.yml"
