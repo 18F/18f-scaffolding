@@ -105,3 +105,24 @@ yo 18f            # all generators
 yo 18f:license
 yo 18f:readme
 ```
+
+### License
+
+```sh
+$ yo 18f:license
+$ tree
+.
+├── CONTRIBUTING.md
+└── LICENSE.md
+```
+
+### Readme
+
+```sh
+$ yo 18f:readme
+? What is the project's full name? My Project
+
+$ tree
+.
+└── README.md
+```
