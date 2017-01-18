@@ -1,0 +1,19 @@
+{
+  "name": "generator-18f",
+  "version": "0.2.0",
+  "description": "Scaffolding for 18F projects",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/18F/18f-cli.git"
+  },
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/18F/18f-cli/issues"
+  },
+  "files": ["app", "license", "readme"],
+  "homepage": "https://github.com/18F/18f-cli#readme",
+  "dependencies": {
+    "axios": "^0.15.3",
+    "yeoman-generator": "^1.0.1"
+  }
+}
