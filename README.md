@@ -104,9 +104,12 @@ yo 18f            # all generators
 # or individually:
 yo 18f:license
 yo 18f:readme
+yo 18f:gitignores
 ```
 
 ### License
+
+Pulls file content from https://github.com/18F/open-source-policy
 
 ```sh
 $ yo 18f:license
@@ -118,6 +121,9 @@ $ tree
 
 ### Readme
 
+Pulls README content from
+https://github.com/18F/open-source-policy/blob/master/README_TEMPLATE.md
+
 ```sh
 $ yo 18f:readme
 ? What is the project's full name? My Project
@@ -125,4 +131,21 @@ $ yo 18f:readme
 $ tree
 .
 └── README.md
+```
+
+### Gitignores
+
+Pulls Gitignore content from https://github.com/github/gitignore
+
+```sh
+$ yo 18f:readme
+? What languages will this project use?
+ ◯ Go
+ ◉ Node
+ ◯ Python
+❯◉ Ruby
+
+$ tree
+.
+└── .gitignore
 ```
