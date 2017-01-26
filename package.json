@@ -13,6 +13,7 @@
   "files": [
     "app",
     "license",
+    "npm",
     "readme"
   ],
   "homepage": "https://github.com/18F/18f-cli#readme",

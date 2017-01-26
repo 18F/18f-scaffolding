@@ -1,5 +1,7 @@
 'use strict';
 
+var path = require('path');
+
 var Generator = require('yeoman-generator');
 
 module.exports = Generator.extend({
@@ -18,7 +20,7 @@ module.exports = Generator.extend({
     if (this.frontendDeps) {
       this.log('Configuring npm now...');
       this.composeWith(require.resolve('generator-npm-init/app'), {
-        repo: 'https://github.com/18F/<%= destFolderName %>',
+        repo: 'https://github.com/18F/' + process.cwd().split(path.sep).pop(),
         author: '18f',
         license: 'CC0-1.0'
       });
