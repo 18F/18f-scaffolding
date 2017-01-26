@@ -17,7 +17,6 @@ module.exports = Generator.extend({
   configuring: function() {
     if (this.frontendDeps) {
       this.log('Configuring npm now...');
-      this.log('\n');
       this.composeWith(require.resolve('generator-npm-init/app'), {
         repo: 'https://github.com/18F/<%= destFolderName %>',
         author: '18f',
