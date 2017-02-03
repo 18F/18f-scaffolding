@@ -27,7 +27,8 @@ module.exports = Generator.extend({
       var content = response.data.replace(
           '[Repo Name]', this.config.get('projectFullName'));
       this.fs.write(this.destinationPath('README.md'), content);
-    }.bind(this));
+    }.bind(this)
+    ).catch(this.env.error.bind(this.env));
   }
 });
 

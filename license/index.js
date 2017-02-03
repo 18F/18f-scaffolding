@@ -14,6 +14,7 @@ module.exports = Generator.extend({
     ).then(function (response) {
       this.fs.write(this.destinationPath('CONTRIBUTING.md'), response.data);
     }.bind(this));
-    return Promise.all([licenseReq, contributingReq]);
+    return Promise.all([licenseReq, contributingReq]
+    ).catch(this.env.error.bind(this.env));
   }
 });

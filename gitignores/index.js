@@ -3,7 +3,7 @@ var axios = require('axios');
 var Generator = require('yeoman-generator');
 var languages = require('../languages');
 
-function fetchGitignore(language, fs, gitignorePath) {
+function fetchGitignore(language, fs, gitignorePath, logError) {
   var url = 'https://raw.githubusercontent.com/github/gitignore/master/';
   url += language + '.gitignore';
 
@@ -11,7 +11,7 @@ function fetchGitignore(language, fs, gitignorePath) {
     var fileContents = fs.read(gitignorePath, {defaults: ''});
     fileContents += '\n\n# === ' + language + ' ===\n' + response.data;
     fs.write(gitignorePath, fileContents);
-  });
+  }).catch(logError);
 };
 
 module.exports = Generator.extend({
@@ -38,7 +38,8 @@ module.exports = Generator.extend({
       return !existingLanguages.has(language);
     }).map(function(language) {
       return fetchGitignore(
-        language, this.fs, this.destinationPath('.gitignore')
+        language, this.fs, this.destinationPath('.gitignore'),
+        this.env.error.bind(this.env)
       );
     }.bind(this));
     return Promise.all(requests);
