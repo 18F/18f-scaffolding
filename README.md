@@ -105,6 +105,8 @@ yo 18f            # all generators
 yo 18f:license
 yo 18f:readme
 yo 18f:gitignores
+yo 18f:npm
+yo 18f:cf-manifest
 ```
 
 ### License
@@ -148,4 +150,47 @@ $ yo 18f:readme
 $ tree
 .
 └── .gitignore
+```
+
+## NPM
+
+Creates a package.json file. Based on
+https://github.com/caseywebb/generator-npm-init
+
+```sh
+$ yo 18f:npm
+? Will this project have front end libraries/dependencies Yes
+Configuring npm now...
+? name: generator-18f
+? version: 0.2.0
+? description: Scaffolding for 18F projects
+? main point: index.js
+? test command: echo "Error: no test specified" && exit 1
+? git repository: https://github.com/18F/18f-cli
+? keywords (space-delimited):
+? author: 18f
+? license: CC0-1.0
+
+$ tree
+.
+└── package.json
+```
+
+## Cloud.gov Manifests
+
+Creates files for a cloud.gov deploy, depending on your primary application
+language. Requires modification after generation.
+
+```sh
+$ yo 18f:cf-manifest
+? What is the primary language (for Travis, Cloud.gov, etc.)? (Use arrow keys)
+❯ Go
+  Node
+  Python
+  Ruby
+
+$ tree
+.
+├── TODO.txt
+└── Procfile
 ```

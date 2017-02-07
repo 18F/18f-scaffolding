@@ -7,5 +7,6 @@ module.exports = Generator.extend({
     this.composeWith(require.resolve('../readme'));
     this.composeWith(require.resolve('../gitignores'));
     this.composeWith(require.resolve('../npm'));
+    this.composeWith(require.resolve('../cf-manifest'));
   }
 });
