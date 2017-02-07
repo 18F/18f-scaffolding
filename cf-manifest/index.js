@@ -1,23 +1,30 @@
 'use strict';
-var Generator = require('yeoman-generator');
-var sharedConfig = require('../shared-config');
-var todo = require('../todo');
+const Generator = require('yeoman-generator');
+const sharedConfig = require('../shared-config');
+const todo = require('../todo');
 
 module.exports = Generator.extend({
   prompting: function () {
     return this.prompt(
-      sharedConfig.promptsFor(this.config, sharedConfig.primaryLanguagePrompt)
+      sharedConfig.promptsFor(this.config,
+                              sharedConfig.primaryLanguagePrompt,
+                              sharedConfig.runCommandPrompt)
     ).then(
-      sharedConfig.saveResultsTo(this.config, sharedConfig.primaryLanguagePrompt)
+      sharedConfig.saveResultsTo(this.config,
+                                 sharedConfig.primaryLanguagePrompt,
+                                 sharedConfig.runCommandPrompt)
     );
   },
   writing: function () {
-    todo.add(this.config, this.fs, {
-      'Cloud.gov Manifests': ['Procfile\'s "run" command']
-    });
-    this.fs.copy(
+    if (this.config.get('runCommand') === sharedConfig.runCommandPrompt.default) {
+      todo.add(this.config, this.fs, {
+        'Cloud.gov Manifests': ['Procfile\'s "run" command']
+      });
+    }
+    this.fs.copyTpl(
         this.templatePath(this.config.get('primaryLanguage') + '/*'),
-        this.destinationPath()
+        this.destinationPath(),
+        {runCommand: this.config.get('runCommand')}
     );
   }
 });

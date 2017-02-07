@@ -16,6 +16,12 @@ const primaryLanguagePrompt = {
   message: 'What is the primary language (for Travis, Cloud.gov, etc.)?',
   choices: languagesPrompt.choices,
 };
+const runCommandPrompt = {
+  type: 'input',
+  name: 'runCommand',
+  message: 'What is your application run command (e.g. "node app.js" or "gunicorn my_module.wsgi")?',
+  default: '@TODO',
+}
 
 
 module.exports = {
@@ -35,4 +41,5 @@ module.exports = {
   supportedLanguages,
   languagesPrompt,
   primaryLanguagePrompt,
+  runCommandPrompt,
 }
