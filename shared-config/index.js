@@ -8,7 +8,13 @@ const languagesPrompt = {
   type: 'checkbox',
   name: 'languages',
   message: 'What languages will this project use?',
-  choices: supportedLanguages.map( l => {name: l})
+  choices: supportedLanguages.map( l => {return {name: l}} ),
+};
+const primaryLanguagePrompt = {
+  type: 'list',
+  name: 'primaryLanguage',
+  message: 'What is the primary language (for Travis, Cloud.gov, etc.)?',
+  choices: languagesPrompt.choices,
 };
 
 
@@ -27,5 +33,6 @@ module.exports = {
     }
   },
   supportedLanguages,
-  languagesPrompt
+  languagesPrompt,
+  primaryLanguagePrompt,
 }
