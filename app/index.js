@@ -8,5 +8,6 @@ module.exports = Generator.extend({
     this.composeWith(require.resolve('../gitignores'));
     this.composeWith(require.resolve('../npm'));
     this.composeWith(require.resolve('../cf-manifest'));
+    this.composeWith(require.resolve('../about-yml'));    
   }
 });
