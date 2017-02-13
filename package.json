@@ -12,10 +12,12 @@
   },
   "files": [
     "app",
-    "license",
+    "cf-manifest",
     "gitignores",
+    "license",
     "npm",
-    "readme"
+    "readme",
+    "shared-config"
   ],
   "homepage": "https://github.com/18F/18f-cli#readme",
   "dependencies": {
