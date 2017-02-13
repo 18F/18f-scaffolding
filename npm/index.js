@@ -1,8 +1,9 @@
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
-var Generator = require('yeoman-generator');
+const Generator = require('yeoman-generator');
+const sharedConfig = require('../shared-config');
 
 module.exports = Generator.extend({
   prompting: function() {
@@ -24,7 +25,7 @@ module.exports = Generator.extend({
         description: this.config.get('description'),
         repo: 'https://github.com/18F/' + this.config.get('repoName'),
         author: '18f',
-        license: 'CC0-1.0'
+        license: sharedConfig.licenseShortName
       });
     }
   }

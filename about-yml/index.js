@@ -1,8 +1,9 @@
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
-var Generator = require('yeoman-generator');
+const Generator = require('yeoman-generator');
+const sharedConfig = require('../shared-config');
 
 var prompts = [
   {
@@ -108,7 +109,7 @@ module.exports = Generator.extend({
     this.fs.copyTpl(
       this.templatePath('about.yml'),
       this.destinationPath('.about.yml'),
-      this.config.getAll()
+      Object.assign({}, this.config.getAll(), sharedConfig)
     );
 
   }
