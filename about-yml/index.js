@@ -1,12 +1,15 @@
 'use strict';
 
+var path = require('path');
+
 var Generator = require('yeoman-generator');
 
 var prompts = [
   {
     type: 'input',
     name: 'repoName',
-    message: 'What\'s the repo name? (A short name that acts as the project identifier)'
+    message: 'What\'s the repo name? (A short name that acts as the project identifier)',
+    default: process.cwd().split(path.sep).pop()
   },
 
   {
@@ -55,7 +58,7 @@ var prompts = [
     choices: ['project', 'working-group', 'guild']
   },
 
-  { 
+  {
     type: 'input',
     name: 'partner',
     message: 'Who is the primary partner for the project? (Use the full name documented here: https://github.com/18F/dashboard/blob/staging/_data/partners.yml )'
@@ -97,7 +100,7 @@ module.exports = Generator.extend({
           prompt['default'] = '@TODO';
         }
         return prompt;
-      }) 
+      })
     ).then( (props) => {
       Object.keys(props).forEach((key) => {
         if (props[key]) {
