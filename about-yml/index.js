@@ -88,13 +88,7 @@ var prompts = [
 module.exports = Generator.extend({
   prompting: function() {
     return this.prompt(prompts
-      .filter( (prompt) => {
-        if (this.config.get(prompt.name)) {
-          return false;
-        } else {
-          return true;
-        }
-      })
+      .filter( prompt => !this.config.get(prompt.name))
       .map( (prompt) => {
         if (prompt.type === 'input' && !prompt.default) {
           prompt['default'] = '@TODO';
