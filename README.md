@@ -107,6 +107,7 @@ yo 18f:readme
 yo 18f:gitignores
 yo 18f:npm
 yo 18f:cf-manifest
+yo 18f:about-yml
 ```
 
 ### License
@@ -193,4 +194,38 @@ $ tree
 .
 ├── TODO.txt
 └── Procfile
+```
+
+## About.yml
+
+Creates an .about.yml file (used in the ATO process).
+
+```sh
+$ yo 18f:about-yml
+? What's the repo name? (A short name that acts as the project identifier) @TODO
+? What's the project title? (A few words, title cased, describing the project) @TODO
+? What is the problem your project solves? What is the solution? @TODO
+? What is the measurable impact of your project? @TODO
+? What is your project's current status? (Use arrow keys)
+❯ discovery
+  alpha
+  beta
+  live
+? Will your project have automated tests? (Y/n)
+? What type of content is being stored in the repo? (Use arrow keys)
+❯ app
+  docs
+  policy
+? What kind of group owns this repo? (Use arrow keys)
+❯ project
+  working-group
+  guild
+? Who is the primary partner for the project? (Use the full name documented here: https://github.com/18F/dashboard/blob/staging/_data/partners.yml ) @TODO
+? Who is the primary team contact for the project? @TODO
+? What is the primary team contact's email address? @TODO
+? If this is a sub-repo of another repo, what is the name of that parent repo?  @TODO
+
+$ tree
+.
+└── .about.yml
 ```
