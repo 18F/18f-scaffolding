@@ -3,6 +3,7 @@
  * ask once.
  */
 
+const licenseShortName = 'CC0-1.0';
 const supportedLanguages = ['Go', 'Node', 'Python', 'Ruby'];
 const languagesPrompt = {
   type: 'checkbox',
@@ -38,6 +39,7 @@ module.exports = {
       });
     }
   },
+  licenseShortName,
   supportedLanguages,
   languagesPrompt,
   primaryLanguagePrompt,

@@ -1,8 +1,9 @@
 'use strict';
 
-var path = require('path');
+const path = require('path');
 
-var Generator = require('yeoman-generator');
+const Generator = require('yeoman-generator');
+const sharedConfig = require('../shared-config');
 
 module.exports = Generator.extend({
   prompting: function() {
@@ -12,17 +13,19 @@ module.exports = Generator.extend({
       message : 'Will this project have front end libraries/dependencies',
       default : true
     }]).then((answers) => {
-      this.frontendDeps = answers.frontendDeps;
+      this.config.set('frontendDeps', answers.frontendDeps);
     });
   },
 
   configuring: function() {
-    if (this.frontendDeps) {
+    if (this.config.get('frontendDeps')) {
       this.log('Configuring npm now...');
       this.composeWith(require.resolve('generator-npm-init/app'), {
-        repo: 'https://github.com/18F/' + process.cwd().split(path.sep).pop(),
+        name: this.config.get('repoName'),
+        description: this.config.get('description'),
+        repo: 'https://github.com/18F/' + this.config.get('repoName'),
         author: '18f',
-        license: 'CC0-1.0'
+        license: sharedConfig.licenseShortName
       });
     }
   }

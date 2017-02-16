@@ -12,6 +12,7 @@
   },
   "files": [
     "app",
+    "about-yml",
     "cf-manifest",
     "gitignores",
     "license",
