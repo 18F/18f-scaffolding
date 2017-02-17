@@ -1,6 +1,6 @@
 {
   "name": "generator-18f",
-  "version": "0.2.0",
+  "version": "0.1.1",
   "description": "Scaffolding for 18F projects",
   "repository": {
     "type": "git",
@@ -11,14 +11,15 @@
     "url": "https://github.com/18F/18f-cli/issues"
   },
   "files": [
-    "app",
     "about-yml",
+    "app",
     "cf-manifest",
     "gitignores",
     "license",
     "npm",
     "readme",
-    "shared-config"
+    "shared-config",
+    "todo"
   ],
   "homepage": "https://github.com/18F/18f-cli#readme",
   "dependencies": {
