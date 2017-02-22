@@ -1,0 +1,7 @@
+---
+stack: cflinuxfs2
+buildpack: <%= primaryLanguage.toLowerCase() %>_buildpack
+applications:
+- name: web
+services:
+- database  # aws-rds medium-psql

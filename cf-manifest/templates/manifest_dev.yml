@@ -1,0 +1,3 @@
+---
+inherit: manifest_base.yml
+host: <%= repoName %>-dev
