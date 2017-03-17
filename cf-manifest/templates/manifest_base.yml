@@ -3,5 +3,12 @@ stack: cflinuxfs2
 buildpack: <%= primaryLanguage.toLowerCase() %>_buildpack
 applications:
 - name: web
+<% if (cloudGovServices.length > 0) { -%>
 services:
+<% if (cloudGovServices.includes('database')) { -%>
 - database  # aws-rds medium-psql
+<% }
+  if (cloudGovServices.includes('secret credentials')) { -%>
+- credentials  # ups with keys: "my"
+<% }
+} -%>
