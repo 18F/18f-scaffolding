@@ -108,6 +108,9 @@ $ yo 18f:cf-manifest
   Python
   Ruby
 ? What is your application run command (e.g. "node app.js" or "gunicorn my_module.wsgi")? @TODO
+? Will this project need any of these services?
+❯◯ database
+ ◯ secret credentials
 
 $ tree
 .
