@@ -1,7 +1,5 @@
 'use strict';
 
-const path = require('path');
-
 const Generator = require('yeoman-generator');
 const sharedConfig = require('../shared-config');
 
