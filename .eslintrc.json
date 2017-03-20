@@ -11,6 +11,7 @@
         },
         "sourceType": "module"
     },
+    "extends": "airbnb-base",
     "rules": {
         "no-const-assign": "warn",
         "no-this-before-super": "warn",
