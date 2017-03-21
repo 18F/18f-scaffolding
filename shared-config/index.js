@@ -1,4 +1,3 @@
-'use strict';
 /* Prompts which are shared across multiple sub-generators. We'd like to only
  * ask once.
  */
@@ -9,7 +8,7 @@ const languagesPrompt = {
   type: 'checkbox',
   name: 'languages',
   message: 'What languages will this project use?',
-  choices: supportedLanguages.map( l => {return {name: l}} ),
+  choices: supportedLanguages.map(l => ({ name: l })),
 };
 const primaryLanguagePrompt = {
   type: 'list',
@@ -22,26 +21,23 @@ const runCommandPrompt = {
   name: 'runCommand',
   message: 'What is your application run command (e.g. "node app.js" or "gunicorn my_module.wsgi")?',
   default: '@TODO',
-}
+};
 
 
 module.exports = {
-  promptsFor: (config, ...prompts) => {
-    return prompts.filter( prompt => !config.get(prompt.name) );
-  },
-  saveResultsTo: (config, ...prompts) => {
-    return (props) => {
-      prompts.forEach( prompt => {
-        var value = props[prompt.name];
-        if (value !== undefined) {
-          config.set(prompt.name, value);
-        }
-      });
-    }
-  },
+  promptsFor: (config, ...prompts) =>
+    prompts.filter(prompt => !config.get(prompt.name)),
+  saveResultsTo: (config, ...prompts) => ((props) => {
+    prompts.forEach((prompt) => {
+      const value = props[prompt.name];
+      if (value !== undefined) {
+        config.set(prompt.name, value);
+      }
+    });
+  }),
   licenseShortName,
   supportedLanguages,
   languagesPrompt,
   primaryLanguagePrompt,
   runCommandPrompt,
-}
+};
