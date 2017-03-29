@@ -1,4 +1,3 @@
-'use strict';
 /* Manages a TODO list which we generate for users. */
 
 module.exports = {
@@ -7,9 +6,9 @@ module.exports = {
     Object.assign(todos, newTodos);
     config.set('todo', todos);
 
-    const content = Object.keys(todos).map( key =>
-        ['## ' + key].concat(todos[key]).join('\n[ ] ')
-    ).join('\n\n\n');
-    fs.write('TODO.txt',  content);
-  }
+    const content = Object.keys(todos)
+      .map(key => [`## ${key}`].concat(todos[key]).join('\n[ ] '))
+      .join('\n\n\n');
+    fs.write('TODO.txt', content);
+  },
 };

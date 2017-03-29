@@ -1,24 +1,22 @@
-'use strict';
-var axios = require('axios');
-var Generator = require('yeoman-generator');
-var sharedConfig = require('../shared-config');
+const axios = require('axios');
+const Generator = require('yeoman-generator');
+const sharedConfig = require('../shared-config');
 
 function fetchAndWriteGitignore(language, fs, gitignorePath, logError) {
-  var url = 'https://raw.githubusercontent.com/github/gitignore/master/';
-  url += language + '.gitignore';
+  const url = `https://raw.githubusercontent.com/github/gitignore/master/${language}.gitignore`;
 
-  return axios.get(url).then(function (response) {
-    var fileContents = fs.read(gitignorePath, {defaults: ''});
-    fileContents += '\n\n# === ' + language + ' ===\n' + response.data;
+  return axios.get(url).then((response) => {
+    let fileContents = fs.read(gitignorePath, { defaults: '' });
+    fileContents += `\n\n# === ${language} ===\n${response.data}`;
     fs.write(gitignorePath, fileContents);
   }).catch(logError);
-};
+}
 
 function languagesAlreadyPresent(filePath, fs) {
-  var languages = new Set();
-  var fileContents = fs.read(filePath, {defaults: ''});
-  var search = /^# === ([^=]+) ===$/gm;
-  var match = search.exec(fileContents);
+  const languages = new Set();
+  const fileContents = fs.read(filePath, { defaults: '' });
+  const search = /^# === ([^=]+) ===$/gm;
+  let match = search.exec(fileContents);
 
   while (match !== null) {
     languages.add(match[1]);
@@ -27,26 +25,23 @@ function languagesAlreadyPresent(filePath, fs) {
   return languages;
 }
 
-module.exports = Generator.extend({
-  prompting: function () {
+module.exports = class extends Generator {
+  prompting() {
     return this.prompt(
-        sharedConfig.promptsFor(this.config, sharedConfig.languagesPrompt)
-      ).then(
-        sharedConfig.saveResultsTo(this.config, sharedConfig.languagesPrompt)
-      );
-  },
-  writing: function () {
-    var filePath = this.destinationPath('.gitignore');
-    var existingLanguages = languagesAlreadyPresent(filePath, this.fs);
-    var requests = this.config.get('languages').filter(function(language) {
-      return !existingLanguages.has(language);
-    }).map(function(language) {
-      return fetchAndWriteGitignore(
+        sharedConfig.promptsFor(this.config, sharedConfig.languagesPrompt))
+      .then(
+        sharedConfig.saveResultsTo(this.config, sharedConfig.languagesPrompt));
+  }
+
+  writing() {
+    const filePath = this.destinationPath('.gitignore');
+    const existingLanguages = languagesAlreadyPresent(filePath, this.fs);
+    const requests = this.config.get('languages')
+      .filter(language => !existingLanguages.has(language))
+      .map(language => fetchAndWriteGitignore(
         language, this.fs, this.destinationPath('.gitignore'),
-        this.env.error.bind(this.env)
-      );
-    }.bind(this));
+        this.env.error.bind(this.env)));
     return Promise.all(requests);
   }
-});
+};
 
