@@ -1,6 +1,7 @@
 /* Prompts which are shared across multiple sub-generators. We'd like to only
  * ask once.
  */
+const path = require('path');
 
 const licenseShortName = 'CC0-1.0';
 const supportedLanguages = ['Go', 'Node', 'Python', 'Ruby'];
@@ -22,6 +23,12 @@ const runCommandPrompt = {
   message: 'What is your application run command (e.g. "node app.js" or "gunicorn my_module.wsgi")?',
   default: '@TODO',
 };
+const repoNamePrompt = {
+  type: 'input',
+  name: 'repoName',
+  message: 'What\'s the repo name? (A short name that acts as the project identifier)',
+  default: process.cwd().split(path.sep).pop(),
+};
 
 
 module.exports = {
@@ -40,4 +47,5 @@ module.exports = {
   languagesPrompt,
   primaryLanguagePrompt,
   runCommandPrompt,
+  repoNamePrompt,
 };

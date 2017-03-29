@@ -1,0 +1,4 @@
+---
+inherit: manifest_base.yml
+host: <%= repoName %>
+instances: 2

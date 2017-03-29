@@ -101,16 +101,24 @@ language. Requires modification after generation.
 
 ```sh
 $ yo 18f:cf-manifest
+? What's the repo name? (A short name that acts as the project identifier) my-repo
 ? What is the primary language (for Travis, Cloud.gov, etc.)? (Use arrow keys)
 ❯ Go
   Node
   Python
   Ruby
+? What is your application run command (e.g. "node app.js" or "gunicorn my_module.wsgi")? @TODO
+? Will this project need any of these services?
+❯◯ database
+ ◯ secret credentials
 
 $ tree
 .
+├── Procfile
 ├── TODO.txt
-└── Procfile
+├── manifest_base.yml
+├── manifest_dev.yml
+└── manifest_prod.yml
 ```
 
 ### About.yml

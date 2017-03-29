@@ -1,15 +1,8 @@
-const path = require('path');
-
 const Generator = require('yeoman-generator');
 const sharedConfig = require('../shared-config');
 
 const prompts = [
-  {
-    type: 'input',
-    name: 'repoName',
-    message: 'What\'s the repo name? (A short name that acts as the project identifier)',
-    default: process.cwd().split(path.sep).pop(),
-  },
+  sharedConfig.repoNamePrompt,
 
   {
     type: 'input',
