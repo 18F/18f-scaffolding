@@ -1,6 +1,6 @@
 {
   "name": "generator-18f",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Scaffolding for 18F projects",
   "scripts": {
     "test": "eslint ."
