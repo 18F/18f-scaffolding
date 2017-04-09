@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "Scaffolding for 18F projects",
   "scripts": {
-    "test": "eslint ."
+    "test": "eslint . && jest"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,10 @@
   "devDependencies": {
     "eslint": "^3.17.1",
     "eslint-config-airbnb-base": "^11.1.1",
-    "eslint-plugin-import": "^2.2.0"
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jest": "^19.0.1",
+    "jest": "^19.0.2",
+    "yeoman-test": "^1.6.0"
   },
   "engines": {
     "node": ">=6.0.0"
