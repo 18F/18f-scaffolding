@@ -1,8 +1,13 @@
 # The 18F Generator
 
 This project contains a set of [Yeoman](http://yeoman.io/) scaffolds to set up
-common project needs. To run them, you'll need
-[Node.js](https://nodejs.org/en/download/); then install yeoman and this
+common project needs. To run them, you'll either need
+[Node.js](https://nodejs.org/en/download/) 6.x or
+[Docker](docker.com/products/overview#install_the_platform)
+
+## Install via Node
+
+Once you have Node installed, you'll also need to install yeoman and this
 package from the public NPM repository:
 
 ```sh
@@ -23,6 +28,23 @@ yo 18f:gitignores
 yo 18f:npm
 yo 18f:cf-manifest
 yo 18f:about-yml
+```
+
+## Install via Docker
+
+Once you have Docker installed, you'll want to run it with the current
+directory mounted:
+
+```sh
+cd /somewhere/else
+
+docker run --rm -it $PWD:/workdir gsa18f/generator
+```
+
+That will run all of the generators. To run them individually, use e.g.
+
+```sh
+docker run --rm -it $PWD:/workdir --entrypoint yo gsa18f/generator 18f:license
 ```
 
 ## Scaffolds
