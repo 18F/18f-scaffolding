@@ -38,13 +38,13 @@ directory mounted:
 ```sh
 cd /somewhere/else
 
-docker run --rm -it $PWD:/workdir gsa18f/generator
+docker run --rm -it -v $PWD:/workdir 18fgsa/generator
 ```
 
 That will run all of the generators. To run them individually, use e.g.
 
 ```sh
-docker run --rm -it $PWD:/workdir --entrypoint yo gsa18f/generator 18f:license
+docker run --rm -it -v $PWD:/workdir --entrypoint yo 18fgsa/generator 18f:license
 ```
 
 ## Scaffolds
