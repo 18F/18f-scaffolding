@@ -10,6 +10,46 @@ var _ = require('lodash');
 
 module.exports = class extends Generator {
 
+  constructor(args, opts) {
+      // Calling the super constructor is important so our generator is correctly set up
+      super(args, opts)
+
+      // choices are dev, production
+      this.writing_to_manifest = function (environment) {
+        var cwd = process.cwd();
+        var manifest = 'manifest_'+environment+'.yml';
+        var environment = 'production';
+        if (fs.existsSync(manifest)) {
+          //var manifest_body = this.readFileAsString(manifest);
+          var manifest_body = fs.readFileSync(manifest, 'utf8');
+          if (manifest_body.indexOf('applications:') < 0) {
+            manifest_body += '\napplications:\n';
+          if (manifest_body.indexOf('env:') < 0) {
+            manifest_body += '\n  env:\n';
+          }
+        }
+        if (manifest_body.indexOf("NEW_RELIC_APP_NAME:") < 0) {
+          manifest_body += '\n\tNEW_RELIC_APP_NAME: ' + this.projectFullName + ' ('+environment+')';
+        }
+        if (manifest_body.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
+          manifest_body += '\n\tNEW_RELIC_CONFIG_FILE: newrelic.ini';
+        }
+        if (manifest_body.indexOf("NEW_RELIC_ENV:") < 0) {
+          manifest_body += '\n\tNEW_RELIC_ENV: "'+environment+'"';
+        }
+        if (manifest_body.indexOf("NEW_RELIC_LOG:") < 0) {
+          manifest_body += '\n\t NEW_RELIC_LOG: "stdout"';
+        }
+        fs.writeFile(manifest, manifest_body, function (err) {
+          if (err) throw err;
+        });
+      } else {
+        this.log("Please run yo 18f:cf-manifest first");
+      }
+    };
+  }
+  
+  
   prompting() {
     const prompts = [];
     if (!this.config.get('projectFullName')) {
@@ -60,35 +100,10 @@ module.exports = class extends Generator {
         const content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
         this.fs.write(this.destinationPath('newrelic.ini'), content);
-        // update the manifest_dev.yml file
-        var cwd = process.cwd();
-        var manifest_dev = 'manifest_dev.yml';
-        if (fs.existsSync(manifest_dev)) {
-          var manifest_dev_body = this.readFileAsString(manifest_dev);
-          if (manifest_dev_body.indexOf('applications:') < 0) {
-            manifest_dev_body += '\napplications:\n';
-          if (manifest_dev_body.indexOf('env:') < 0) {
-            manifest_dev_body += '\n  env:\n';
-          }
-        }
-        if (manifest_dev_body.indexOf("NEW_RELIC_APP_NAME:") < 0) {
-          manifest_dev_body += '\n\tNEW_RELIC_APP_NAME: ' + this.projectFullName + ' (dev)';
-        }
-        if (manifest_dev_body.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
-          manifest_dev_body += '\n\tNEW_RELIC_CONFIG_FILE: newrelic.ini';
-        }
-        if (manifest_dev_body.indexOf("NEW_RELIC_ENV:") < 0) {
-          manifest_dev_body += '\n\tNEW_RELIC_ENV: "dev"';
-        }
-        if (manifest_dev_body.indexOf("NEW_RELIC_LOG:") < 0) {
-          manifest_dev_body += '\n\t NEW_RELIC_LOG: "stdout"';
-        }
-        fs.writeFile(manifest_dev, manifest_dev_body, function (err) {
-          if (err) throw err;
-        });
-      } else {
-        this.log("Please run yo 18f:cf-manifest first");
-      }
+        // update manifest_dev.yml
+        this.writing_to_manifest('dev');
+        // update manifest_prod.yml
+        this.writing_to_manifest('prod');
       }).catch(this.env.error.bind(this.env));
   }
 }
