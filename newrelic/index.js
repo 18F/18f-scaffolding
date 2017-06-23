@@ -91,7 +91,7 @@ module.exports = class extends Generator {
             if (err) throw err;
           });
         } else {
-          this.log("Please create requirements.txt first");
+          this.log("Please create package.json first");
         }
       };
 
@@ -191,7 +191,7 @@ module.exports = class extends Generator {
     }
     if (this.config.get('projectBackendLanguage') === 'Javascript') {
       return axios.get(
-        'https://raw.githubusercontent.com/EricSchles/new-relic/master/javascript-low-security.yml')
+        'https://raw.githubusercontent.com/EricSchles/new-relic/master/javascript-low-security.js')
       .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
