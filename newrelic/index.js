@@ -6,7 +6,7 @@ module.exports = class extends Generator {
 
   constructor(args, opts) {
     // Calling the super constructor is important so our generator is correctly set up
-    super(args, opts)
+    super(args, opts);
 
     this.newrelic_config = function (manifestBody, language) {
         var newrelicFile = '';
@@ -30,10 +30,8 @@ module.exports = class extends Generator {
 
       // choices are dev, production
       this.writing_to_manifest = function (environment, language) {
-        var cwd = process.cwd();
-        var manifest = 'manifest_'+environment+'.yml';
+        let manifest = 'manifest_'+environment+'.yml';
         if (fs.existsSync(manifest)) {
-          //var manifest_body = this.readFileAsString(manifest);
           var manifestBody = fs.readFileSync(manifest, 'utf8');
           if (manifestBody.indexOf('applications:') < 0) {
             manifestBody += '\napplications:\n';
@@ -60,8 +58,7 @@ module.exports = class extends Generator {
       };
       
       this.writing_to_requirements_txt = function () {
-        var cwd = process.cwd();
-        var requirementsFile = 'requirements.txt';
+        let requirementsFile = 'requirements.txt';
         if (fs.existsSync(requirementsFile)) {
           //var manifest_body = this.readFileAsString(manifest);
           var requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
@@ -75,12 +72,10 @@ module.exports = class extends Generator {
       };
 
       this.writing_to_packages_json = function () {
-        var cwd = process.cwd();
-        var packageJson = 'package.json';
+        let packageJson = 'package.json';
         if (fs.existsSync(packageJson)) {
-          //var manifest_body = this.readFileAsString(manifest);
-          var packageBody = fs.readFileSync(packageJson, 'utf8');  
-          var jsonPackageObj = JSON.parse(packageBody);
+          let packageBody = fs.readFileSync(packageJson, 'utf8');  
+          let jsonPackageObj = JSON.parse(packageBody);
           jsonPackageObj['dependencies']['newrelic'] = 'latest';
           packageBody = JSON.stringify(jsonPackageObj);
           fs.writeFile(packageJson, packageBody, function (err) {
@@ -92,11 +87,10 @@ module.exports = class extends Generator {
       };
 
       this.writing_to_gemfile = function () {
-        var cwd = process.cwd();
-        var gemfile = 'Gemfile';
+        let gemfile = 'Gemfile';
         if (fs.existsSync(gemfile)) {
           //var manifest_body = this.readFileAsString(manifest);
-          var gembody = fs.readFileSync(gemfile, 'utf8');
+          let gembody = fs.readFileSync(gemfile, 'utf8');
           if ( gembody.indexOf("source 'https://rubygems.org'") < 0) {
             gembody += "source 'https://rubygems.org'";
           }
@@ -201,7 +195,6 @@ module.exports = class extends Generator {
         this.writing_to_packages_json();
       }).catch(this.env.error.bind(this.env));
     }
-
 }
 
 };
