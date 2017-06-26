@@ -193,5 +193,4 @@ module.exports = class extends Generator {
       }).catch(this.env.error.bind(this.env));
     }
 }
-
 };
