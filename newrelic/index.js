@@ -93,7 +93,7 @@ module.exports = class extends Generator {
           if ( gembody.indexOf("source 'https://rubygems.org'") < 0) {
             gembody += "source 'https://rubygems.org'";
           }
-          gembody += '\ngem 'newrelic_rpm'\n';
+          gembody += "\ngem 'newrelic_rpm'\n";
           fs.writeFile(gemfile, gembody, function (err) {
             if (err) throw err;
           });
