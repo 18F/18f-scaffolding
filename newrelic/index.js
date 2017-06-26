@@ -1,12 +1,6 @@
 const axios = require('axios');
 const Generator = require('yeoman-generator');
-var fs = require('fs');
-var util = require('util');
-var path = require('path');
-var spawn = require('child_process').spawn;
-var yeoman = require('yeoman-generator');
-var chalk = require('chalk');
-var _ = require('lodash');
+const fs = require('fs');
 
 module.exports = class extends Generator {
 
