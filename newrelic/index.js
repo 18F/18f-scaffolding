@@ -14,19 +14,19 @@ module.exports = class extends Generator {
       // Calling the super constructor is important so our generator is correctly set up
       super(args, opts)
 
-      this.newrelic_config = function (manifest_body, language) {
+      this.newrelic_config = function (manifestBody, language) {
         if (language == "Python") {
-          if (manifest_body.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
+          if (manifestBody.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
               return '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
             }
         }
         if (language == "Ruby") {
-         if (manifest_body.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
+         if (manifestBody.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
               return '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
           } 
         }
         if (language == "Javascript") {
-         if (manifest_body.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
+         if (manifestBody.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
               return '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
           } 
         }
@@ -38,24 +38,24 @@ module.exports = class extends Generator {
         var manifest = 'manifest_'+environment+'.yml';
         if (fs.existsSync(manifest)) {
           //var manifest_body = this.readFileAsString(manifest);
-          var manifest_body = fs.readFileSync(manifest, 'utf8');
-          if (manifest_body.indexOf('applications:') < 0) {
-            manifest_body += '\napplications:\n';
-          if (manifest_body.indexOf('env:') < 0) {
-              manifest_body += '  env:\n';
+          var manifestBody = fs.readFileSync(manifest, 'utf8');
+          if (manifestBody.indexOf('applications:') < 0) {
+            manifestBody += '\napplications:\n';
+          if (manifestBody.indexOf('env:') < 0) {
+              manifestBody += '  env:\n';
             }
           }
-        if (manifest_body.indexOf("NEW_RELIC_APP_NAME:") < 0) {
-            manifest_body += '\n    NEW_RELIC_APP_NAME: ' + this.projectFullName + ' ('+environment+')';
+        if (manifestBody.indexOf("NEW_RELIC_APP_NAME:") < 0) {
+            manifestBody += '\n    NEW_RELIC_APP_NAME: ' + this.projectFullName + ' ('+environment+')';
           }
-        manifest_body += this.newrelic_config(manifest_body, language);
-        if (manifest_body.indexOf("NEW_RELIC_ENV:") < 0) {
-            manifest_body += '\n    NEW_RELIC_ENV: "'+environment+'"';
+        manifestBody += this.newrelic_config(manifest_body, language);
+        if (manifestBody.indexOf("NEW_RELIC_ENV:") < 0) {
+            manifestBody += '\n    NEW_RELIC_ENV: "'+environment+'"';
           }
-        if (manifest_body.indexOf("NEW_RELIC_LOG:") < 0) {
-            manifest_body += '\n    NEW_RELIC_LOG: "stdout"';
+        if (manifestBody.indexOf("NEW_RELIC_LOG:") < 0) {
+            manifestBody += '\n    NEW_RELIC_LOG: "stdout"';
           }
-        fs.writeFile(manifest, manifest_body, function (err) {
+        fs.writeFile(manifest, manifestBody, function (err) {
             if (err) throw err;
           });
         } else {
@@ -65,12 +65,12 @@ module.exports = class extends Generator {
       
       this.writing_to_requirements_txt = function () {
         var cwd = process.cwd();
-        var requirements_file = 'requirements.txt';
-        if (fs.existsSync(requirements_file)) {
+        var requirementsFile = 'requirements.txt';
+        if (fs.existsSync(requirementsFile)) {
           //var manifest_body = this.readFileAsString(manifest);
-          var requirements_body = fs.readFileSync(requirements_file, 'utf8');
-          requirements_body += "\nnewrelic\n"
-          fs.writeFile(requirements_file, requirements_body, function (err) {
+          var requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
+          requirementsBody += "\nnewrelic\n"
+          fs.writeFile(requirementsFile, requirementsBody, function (err) {
             if (err) throw err;
           });
         } else {
@@ -80,14 +80,14 @@ module.exports = class extends Generator {
 
       this.writing_to_packages_json = function () {
         var cwd = process.cwd();
-        var package_json = 'package.json';
-        if (fs.existsSync(package_json)) {
+        var packageJson = 'package.json';
+        if (fs.existsSync(packageJson)) {
           //var manifest_body = this.readFileAsString(manifest);
-          var package_body = fs.readFileSync(package_json, 'utf8');  
-          var json_package_obj = JSON.parse(package_body);
-          json_package_obj["dependencies"]["newrelic"] = "latest";
-          package_body = JSON.stringify(json_package_obj);
-          fs.writeFile(package_json, package_body, function (err) {
+          var packageBody = fs.readFileSync(packageJson, 'utf8');  
+          var jsonPackageObj = JSON.parse(packageBody);
+          jsonPackageObj["dependencies"]["newrelic"] = "latest";
+          packageBody = JSON.stringify(jsonPackageObj);
+          fs.writeFile(packageJson, packageBody, function (err) {
             if (err) throw err;
           });
         } else {
