@@ -8,6 +8,6 @@ module.exports = class extends Generator {
     this.composeWith(require.resolve('../npm'));
     this.composeWith(require.resolve('../cf-manifest'));
     this.composeWith(require.resolve('../about-yml'));
-    this.composeWith(require.resolve('../newrelic'))
+    this.composeWith(require.resolve('../newrelic'));
   }
 };
