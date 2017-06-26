@@ -25,13 +25,14 @@ module.exports = class extends Generator {
         } 
       }
       return newrelicFile;
-    }
+    };
 
     // choices are dev, production
     this.writing_to_manifest = function (environment, language) {
-      let manifest = 'manifest_'+environment+'.yml';
+      const manifest = `manifest_${environment}.yml`;
+      var manifestBody;
       if (fs.existsSync(manifest)) {
-        var manifestBody = fs.readFileSync(manifest, 'utf8');
+        manifestBody = fs.readFileSync(manifest, 'utf8');
         if (manifestBody.indexOf('applications:') < 0) {
           manifestBody += '\napplications:\n';
         if (manifestBody.indexOf('env:') < 0) {
@@ -39,14 +40,14 @@ module.exports = class extends Generator {
         }
       }
       if (manifestBody.indexOf('NEW_RELIC_APP_NAME:') < 0) {
-          manifestBody += '\n    NEW_RELIC_APP_NAME: ' + this.projectFullName + ' ('+environment+')';
+          manifestBody += `\n    NEW_RELIC_APP_NAME: ${this.projectFullName} (${environment})`;
         }
-      manifestBody += this.newrelic_config(manifest_body, language);
+      manifestBody += this.newrelic_config(manifestBody, language);
       if (manifestBody.indexOf('NEW_RELIC_ENV:') < 0) {
-          manifestBody += '\n    NEW_RELIC_ENV: "'+environment+'"';
+          manifestBody += `\n    NEW_RELIC_ENV: "${environment}"`;
         }
       if (manifestBody.indexOf('NEW_RELIC_LOG:') < 0) {
-          manifestBody += '\n    NEW_RELIC_LOG: "stdout"';
+          manifestBody += `\n    NEW_RELIC_LOG: "stdout"`;
         }
       fs.writeFile(manifest, manifestBody, function (err) {
           if (err) throw err;
@@ -57,7 +58,7 @@ module.exports = class extends Generator {
     };
       
     this.writing_to_requirements_txt = function () {
-      let requirementsFile = 'requirements.txt';
+      const requirementsFile = 'requirements.txt';
       if (fs.existsSync(requirementsFile)) {  
         let requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
         requirementsBody += '\nnewrelic\n';
@@ -70,11 +71,11 @@ module.exports = class extends Generator {
     };
 
     this.writing_to_packages_json = function () {
-      let packageJson = 'package.json';
+      const packageJson = 'package.json';
       if (fs.existsSync(packageJson)) {
         let packageBody = fs.readFileSync(packageJson, 'utf8');  
         let jsonPackageObj = JSON.parse(packageBody);
-        jsonPackageObj['dependencies']['newrelic'] = 'latest';
+        jsonPackageObj.dependencies.newrelic = 'latest';
         packageBody = JSON.stringify(jsonPackageObj);
         fs.writeFile(packageJson, packageBody, function (err) {
           if (err) throw err;
@@ -85,7 +86,7 @@ module.exports = class extends Generator {
     };
 
     this.writing_to_gemfile = function () {
-      let gemfile = 'Gemfile';
+      const gemfile = 'Gemfile';
       if (fs.existsSync(gemfile)) {
         let gembody = fs.readFileSync(gemfile, 'utf8');
         if ( gembody.indexOf("source 'https://rubygems.org'") < 0) {
@@ -99,9 +100,8 @@ module.exports = class extends Generator {
       } else {
         this.log('Please create Gemfile first');
       }
-    }  
-  }
-  
+    } 
+  }  
   
   prompting() {
     const prompts = [];
@@ -121,11 +121,11 @@ module.exports = class extends Generator {
         name: 'Django',
         value: 'Python',
         checked: false
-      },{
+        }, {
         name: 'Rails',
         value: 'Ruby',
         checked: false
-      },{
+        }, {
         name: 'Node.js',
         value: 'Javascript',
         checked: false
