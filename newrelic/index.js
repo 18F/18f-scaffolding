@@ -30,15 +30,15 @@ module.exports = class extends Generator {
     // choices are dev, production
     this.writing_to_manifest = function (environment, language) {
       const manifest = `manifest_${environment}.yml`;
-      var manifestBody;
+      let manifestBody;
       if (fs.existsSync(manifest)) {
         manifestBody = fs.readFileSync(manifest, 'utf8');
         if (manifestBody.indexOf('applications:') < 0) {
           manifestBody += '\napplications:\n';
         if (manifestBody.indexOf('env:') < 0) {
           manifestBody += '  env:\n';
+          }
         }
-      }
       if (manifestBody.indexOf('NEW_RELIC_APP_NAME:') < 0) {
           manifestBody += `\n    NEW_RELIC_APP_NAME: ${this.projectFullName} (${environment})`;
         }
@@ -49,9 +49,9 @@ module.exports = class extends Generator {
       if (manifestBody.indexOf('NEW_RELIC_LOG:') < 0) {
           manifestBody += `\n    NEW_RELIC_LOG: "stdout"`;
         }
-      fs.writeFile(manifest, manifestBody, function (err) {
+      fs.writeFile(manifest, manifestBody) => function (err) {
           if (err) throw err;
-        });
+        }
       } else {
         this.log('Please run yo 18f:cf-manifest first');
       }
