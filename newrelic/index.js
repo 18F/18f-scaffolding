@@ -5,25 +5,27 @@ const fs = require('fs');
 module.exports = class extends Generator {
 
   constructor(args, opts) {
-      // Calling the super constructor is important so our generator is correctly set up
-      super(args, opts)
+    // Calling the super constructor is important so our generator is correctly set up
+    super(args, opts)
 
-      this.newrelic_config = function (manifestBody, language) {
-        if (language == "Python") {
-          if (manifestBody.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
-              return '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
+    this.newrelic_config = function (manifestBody, language) {
+        var newrelicFile = '';
+        if (language === 'Python') {
+          if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+              newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
             }
         }
-        if (language == "Ruby") {
-         if (manifestBody.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
-              return '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
+        if (language === 'Ruby') {
+         if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+              newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
           } 
         }
-        if (language == "Javascript") {
-         if (manifestBody.indexOf("NEW_RELIC_CONFIG_FILE:") < 0) {
-              return '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
+        if (language === 'Javascript') {
+         if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+              newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
           } 
         }
+        return newrelicFile;
       }
 
       // choices are dev, production
@@ -39,21 +41,21 @@ module.exports = class extends Generator {
               manifestBody += '  env:\n';
             }
           }
-        if (manifestBody.indexOf("NEW_RELIC_APP_NAME:") < 0) {
+        if (manifestBody.indexOf('NEW_RELIC_APP_NAME:') < 0) {
             manifestBody += '\n    NEW_RELIC_APP_NAME: ' + this.projectFullName + ' ('+environment+')';
           }
         manifestBody += this.newrelic_config(manifest_body, language);
-        if (manifestBody.indexOf("NEW_RELIC_ENV:") < 0) {
+        if (manifestBody.indexOf('NEW_RELIC_ENV:') < 0) {
             manifestBody += '\n    NEW_RELIC_ENV: "'+environment+'"';
           }
-        if (manifestBody.indexOf("NEW_RELIC_LOG:") < 0) {
+        if (manifestBody.indexOf('NEW_RELIC_LOG:') < 0) {
             manifestBody += '\n    NEW_RELIC_LOG: "stdout"';
           }
         fs.writeFile(manifest, manifestBody, function (err) {
             if (err) throw err;
           });
         } else {
-         this.log("Please run yo 18f:cf-manifest first");
+         this.log('Please run yo 18f:cf-manifest first');
         }
       };
       
@@ -63,12 +65,12 @@ module.exports = class extends Generator {
         if (fs.existsSync(requirementsFile)) {
           //var manifest_body = this.readFileAsString(manifest);
           var requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
-          requirementsBody += "\nnewrelic\n"
+          requirementsBody += '\nnewrelic\n';
           fs.writeFile(requirementsFile, requirementsBody, function (err) {
             if (err) throw err;
           });
         } else {
-          this.log("Please create requirements.txt first");
+          this.log('Please create requirements.txt first');
         }
       };
 
@@ -79,13 +81,13 @@ module.exports = class extends Generator {
           //var manifest_body = this.readFileAsString(manifest);
           var packageBody = fs.readFileSync(packageJson, 'utf8');  
           var jsonPackageObj = JSON.parse(packageBody);
-          jsonPackageObj["dependencies"]["newrelic"] = "latest";
+          jsonPackageObj['dependencies']['newrelic'] = 'latest';
           packageBody = JSON.stringify(jsonPackageObj);
           fs.writeFile(packageJson, packageBody, function (err) {
             if (err) throw err;
           });
         } else {
-          this.log("Please create package.json first");
+          this.log('Please create package.json first');
         }
       };
 
@@ -98,13 +100,13 @@ module.exports = class extends Generator {
           if ( gembody.indexOf("source 'https://rubygems.org'") < 0) {
             gembody += "source 'https://rubygems.org'";
           }
-          gembody += "\ngem 'newrelic_rpm'\n"
+          gembody += '\ngem 'newrelic_rpm'\n';
           fs.writeFile(gemfile, gembody, function (err) {
             if (err) throw err;
           });
           this.log("Don't forget to run bundle install!");
         } else {
-          this.log("Please create Gemfile first");
+          this.log('Please create Gemfile first');
         }
       }  
   }
@@ -201,6 +203,5 @@ module.exports = class extends Generator {
     }
 
 }
-
 
 };
