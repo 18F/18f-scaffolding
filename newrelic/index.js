@@ -151,8 +151,12 @@ module.exports = class extends Generator {
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
-          const content = response.data.replace(
+          let content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
+          while (content.indexOf('[Project Name') > 0) {
+            content = content.replace('[Project Name]', 
+              this.config.get('projectFullName'));
+          }
           this.fs.write(this.destinationPath('newrelic.ini'), content);
           // update manifest_dev.yml
           this.writing_to_manifest('dev');
@@ -167,8 +171,12 @@ module.exports = class extends Generator {
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
-          const content = response.data.replace(
+          let content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
+          while (content.indexOf('[Project Name') > 0) {
+            content = content.replace('[Project Name]', 
+              this.config.get('projectFullName'));
+          }
           this.fs.write(this.destinationPath('newrelic.yml'), content);
           // update manifest_dev.yml
           this.writing_to_manifest('dev');
@@ -183,8 +191,12 @@ module.exports = class extends Generator {
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
-          const content = response.data.replace(
+          let content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
+          while (content.indexOf('[Project Name') > 0) {
+            content = content.replace('[Project Name]', 
+              this.config.get('projectFullName'));
+          }
           this.fs.write(this.destinationPath('newrelic.js'), content);
           // update manifest_dev.yml
           this.writing_to_manifest('dev');
