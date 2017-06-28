@@ -154,8 +154,7 @@ module.exports = class extends Generator {
           let content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
           while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', 
-              this.config.get('projectFullName'));
+            content = content.replace('[Project Name]', this.config.get('projectFullName'));
           }
           this.fs.write(this.destinationPath('newrelic.ini'), content);
           // update manifest_dev.yml
@@ -174,8 +173,7 @@ module.exports = class extends Generator {
           let content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
           while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', 
-              this.config.get('projectFullName'));
+            content = content.replace('[Project Name]', this.config.get('projectFullName'));
           }
           this.fs.write(this.destinationPath('newrelic.yml'), content);
           // update manifest_dev.yml
@@ -194,8 +192,7 @@ module.exports = class extends Generator {
           let content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
           while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', 
-              this.config.get('projectFullName'));
+            content = content.replace('[Project Name]', this.config.get('projectFullName'));
           }
           this.fs.write(this.destinationPath('newrelic.js'), content);
           // update manifest_dev.yml
