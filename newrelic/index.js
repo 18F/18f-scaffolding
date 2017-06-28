@@ -11,18 +11,18 @@ module.exports = class extends Generator {
       let newrelicFile = '';
       if (language === 'Python') {
         if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-            newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
-          }
+          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
+        }
       }
       if (language === 'Ruby') {
         if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-            newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
-        } 
+          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
+        }
       }
       if (language === 'Javascript') {
         if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-            newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
-        } 
+          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
+        }
       }
       return newrelicFile;
     };
@@ -35,34 +35,34 @@ module.exports = class extends Generator {
         manifestBody = fs.readFileSync(manifest, 'utf8');
         if (manifestBody.indexOf('applications:') < 0) {
           manifestBody += '\napplications:\n';
-        if (manifestBody.indexOf('env:') < 0) {
-          manifestBody += '  env:\n';
+          if (manifestBody.indexOf('env:') < 0) {
+            manifestBody += '  env:\n';
           }
         }
-      if (manifestBody.indexOf('NEW_RELIC_APP_NAME:') < 0) {
+        if (manifestBody.indexOf('NEW_RELIC_APP_NAME:') < 0) {
           manifestBody += `\n    NEW_RELIC_APP_NAME: ${this.projectFullName} (${environment})`;
         }
-      manifestBody += this.newrelic_config(manifestBody, language);
-      if (manifestBody.indexOf('NEW_RELIC_ENV:') < 0) {
+        manifestBody += this.newrelic_config(manifestBody, language);
+        if (manifestBody.indexOf('NEW_RELIC_ENV:') < 0) {
           manifestBody += `\n    NEW_RELIC_ENV: "${environment}"`;
         }
-      if (manifestBody.indexOf('NEW_RELIC_LOG:') < 0) {
-          manifestBody += `\n    NEW_RELIC_LOG: "stdout"`;
+        if (manifestBody.indexOf('NEW_RELIC_LOG:') < 0) {
+          manifestBody += '\n    NEW_RELIC_LOG: "stdout"';
         }
-      fs.writeFile(manifest, manifestBody) => function (err) {
+        fs.writeFile(manifest, manifestBody, (err) => {
           if (err) throw err;
-        }
+        });
       } else {
         this.log('Please run yo 18f:cf-manifest first');
       }
     };
-      
+
     this.writing_to_requirements_txt = function () {
       const requirementsFile = 'requirements.txt';
-      if (fs.existsSync(requirementsFile)) {  
+      if (fs.existsSync(requirementsFile)) {
         let requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
         requirementsBody += '\nnewrelic\n';
-        fs.writeFile(requirementsFile, requirementsBody, function (err) {
+        fs.writeFile(requirementsFile, requirementsBody, (err) => {
           if (err) throw err;
         });
       } else {
@@ -73,11 +73,11 @@ module.exports = class extends Generator {
     this.writing_to_packages_json = function () {
       const packageJson = 'package.json';
       if (fs.existsSync(packageJson)) {
-        let packageBody = fs.readFileSync(packageJson, 'utf8');  
-        let jsonPackageObj = JSON.parse(packageBody);
+        let packageBody = fs.readFileSync(packageJson, 'utf8');
+        const jsonPackageObj = JSON.parse(packageBody);
         jsonPackageObj.dependencies.newrelic = 'latest';
         packageBody = JSON.stringify(jsonPackageObj);
-        fs.writeFile(packageJson, packageBody, function (err) {
+        fs.writeFile(packageJson, packageBody, (err) => {
           if (err) throw err;
         });
       } else {
@@ -89,20 +89,20 @@ module.exports = class extends Generator {
       const gemfile = 'Gemfile';
       if (fs.existsSync(gemfile)) {
         let gembody = fs.readFileSync(gemfile, 'utf8');
-        if ( gembody.indexOf("source 'https://rubygems.org'") < 0) {
+        if (gembody.indexOf("source 'https://rubygems.org'") < 0) {
           gembody += "source 'https://rubygems.org'";
         }
         gembody += "\ngem 'newrelic_rpm'\n";
-        fs.writeFile(gemfile, gembody, function (err) {
+        fs.writeFile(gemfile, gembody, (err) => {
           if (err) throw err;
         });
         this.log("Don't forget to run bundle install!");
       } else {
         this.log('Please create Gemfile first');
       }
-    } 
-  }  
-  
+    };
+  }
+
   prompting() {
     const prompts = [];
     if (!this.config.get('projectFullName')) {
@@ -118,18 +118,18 @@ module.exports = class extends Generator {
         name: 'projectBackendLanguage',
         message: 'What backend language is the project using?',
         choices: [{
-        name: 'Django',
-        value: 'Python',
-        checked: false
+          name: 'Django',
+          value: 'Python',
+          checked: false,
         }, {
-        name: 'Rails',
-        value: 'Ruby',
-        checked: false
+          name: 'Rails',
+          value: 'Ruby',
+          checked: false,
         }, {
-        name: 'Node.js',
-        value: 'Javascript',
-        checked: false
-      }]
+          name: 'Node.js',
+          value: 'Javascript',
+          checked: false,
+        }],
       });
     }
 
@@ -144,53 +144,55 @@ module.exports = class extends Generator {
   }
 
   writing() {
+    let result;
     if (this.config.get('projectBackendLanguage') === 'Python') {
-      return axios.get(
+      result = axios.get(
         'https://raw.githubusercontent.com/EricSchles/new-relic/master/python-low-security.ini')
-      .then((response) => {
+        .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
-        const content = response.data.replace(
+          const content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
-        this.fs.write(this.destinationPath('newrelic.ini'), content);
-        // update manifest_dev.yml
-        this.writing_to_manifest('dev');
-        // update manifest_prod.yml
-        this.writing_to_manifest('prod');
-        this.writing_to_requirements_txt();
-      }).catch(this.env.error.bind(this.env));
+          this.fs.write(this.destinationPath('newrelic.ini'), content);
+          // update manifest_dev.yml
+          this.writing_to_manifest('dev');
+          // update manifest_prod.yml
+          this.writing_to_manifest('prod');
+          this.writing_to_requirements_txt();
+        }).catch(this.env.error.bind(this.env));
     }
     if (this.config.get('projectBackendLanguage') === 'Ruby') {
-      return axios.get(
+      result = axios.get(
         'https://raw.githubusercontent.com/EricSchles/new-relic/master/ruby-low-security.yml')
-      .then((response) => {
+        .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
-        const content = response.data.replace(
+          const content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
-        this.fs.write(this.destinationPath('newrelic.yml'), content);
-        // update manifest_dev.yml
-        this.writing_to_manifest('dev');
-        // update manifest_prod.yml
-        this.writing_to_manifest('prod');
-        this.writing_to_gemfile();
-      }).catch(this.env.error.bind(this.env));
+          this.fs.write(this.destinationPath('newrelic.yml'), content);
+          // update manifest_dev.yml
+          this.writing_to_manifest('dev');
+          // update manifest_prod.yml
+          this.writing_to_manifest('prod');
+          this.writing_to_gemfile();
+        }).catch(this.env.error.bind(this.env));
     }
     if (this.config.get('projectBackendLanguage') === 'Javascript') {
-      return axios.get(
+      result = axios.get(
         'https://raw.githubusercontent.com/EricSchles/new-relic/master/javascript-low-security.js')
-      .then((response) => {
+        .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
-        const content = response.data.replace(
+          const content = response.data.replace(
             '[Project Name]', this.config.get('projectFullName'));
-        this.fs.write(this.destinationPath('newrelic.js'), content);
-        // update manifest_dev.yml
-        this.writing_to_manifest('dev');
-        // update manifest_prod.yml
-        this.writing_to_manifest('prod');
-        this.writing_to_packages_json();
-      }).catch(this.env.error.bind(this.env));
+          this.fs.write(this.destinationPath('newrelic.js'), content);
+          // update manifest_dev.yml
+          this.writing_to_manifest('dev');
+          // update manifest_prod.yml
+          this.writing_to_manifest('prod');
+          this.writing_to_packages_json();
+        }).catch(this.env.error.bind(this.env));
     }
-}
+    return result;
+  }
 };
