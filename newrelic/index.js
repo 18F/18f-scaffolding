@@ -147,7 +147,7 @@ module.exports = class extends Generator {
     let result;
     if (this.config.get('projectBackendLanguage') === 'Python') {
       result = axios.get(
-        'https://raw.githubusercontent.com/EricSchles/new-relic/master/python-low-security.ini')
+        'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/python-low-security.ini')
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
@@ -166,7 +166,7 @@ module.exports = class extends Generator {
     }
     if (this.config.get('projectBackendLanguage') === 'Ruby') {
       result = axios.get(
-        'https://raw.githubusercontent.com/EricSchles/new-relic/master/ruby-low-security.yml')
+        'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/ruby-low-security.yml')
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
@@ -185,7 +185,7 @@ module.exports = class extends Generator {
     }
     if (this.config.get('projectBackendLanguage') === 'Javascript') {
       result = axios.get(
-        'https://raw.githubusercontent.com/EricSchles/new-relic/master/javascript-low-security.js')
+        'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/javascript-low-security.js')
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
