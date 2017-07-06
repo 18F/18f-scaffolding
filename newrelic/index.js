@@ -2,7 +2,29 @@ const axios = require('axios');
 const Generator = require('yeoman-generator');
 const fs = require('fs');
 
+const newrelicConfig = function (manifestBody, language) {
+  let newrelicFile = '';
+  if (language === 'Python') {
+    if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+      newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
+    }
+  }
+  if (language === 'Ruby') {
+    if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+      newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
+    }
+  }
+  if (language === 'Javascript') {
+    if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+      newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
+    }
+  }
+  return newrelicFile;
+};
+
 module.exports = class extends Generator {
+
+
   constructor(args, opts) {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
@@ -23,7 +45,7 @@ module.exports = class extends Generator {
         if (manifestBody.indexOf('NEW_RELIC_APP_NAME:') < 0) {
           manifestBody += `\n    NEW_RELIC_APP_NAME: ${this.projectFullName} (${environment})`;
         }
-        manifestBody += this.newrelic_config(manifestBody, language);
+        manifestBody += newrelicConfig(manifestBody, language);
         if (manifestBody.indexOf('NEW_RELIC_ENV:') < 0) {
           manifestBody += `\n    NEW_RELIC_ENV: "${environment}"`;
         }
@@ -78,25 +100,6 @@ module.exports = class extends Generator {
     };
   }
 
-  newrelicConfig(manifestBody, language) {
-    let newrelicFile = '';
-    if (language === 'Python') {
-      if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-        newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
-      }
-    }
-    if (language === 'Ruby') {
-      if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-        newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
-      }
-    }
-    if (language === 'Javascript') {
-      if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-        newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
-      }
-    }
-    return newrelicFile;
-  }
 
   prompting() {
     const prompts = [];
