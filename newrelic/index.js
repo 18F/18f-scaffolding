@@ -7,28 +7,8 @@ module.exports = class extends Generator {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
 
-    this.newrelic_config = function (manifestBody, language) {
-      let newrelicFile = '';
-      if (language === 'Python') {
-        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
-        }
-      }
-      if (language === 'Ruby') {
-        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
-        }
-      }
-      if (language === 'Javascript') {
-        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
-        }
-      }
-      return newrelicFile;
-    };
-
     // choices are dev, production
-    this.writing_to_manifest = function (environment, language) {
+    this.write_to_manifest = function (environment, language) {
       const manifest = `manifest_${environment}.yml`;
       let manifestBody;
       if (fs.existsSync(manifest)) {
@@ -57,7 +37,7 @@ module.exports = class extends Generator {
       }
     };
 
-    this.writing_to_requirements_txt = function () {
+    this.write_to_requirements_txt = function () {
       const requirementsFile = 'requirements.txt';
       if (fs.existsSync(requirementsFile)) {
         let requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
@@ -70,7 +50,7 @@ module.exports = class extends Generator {
       }
     };
 
-    this.writing_to_packages_json = function () {
+    this.write_to_packages_json = function () {
       const packageJson = 'package.json';
       if (fs.existsSync(packageJson)) {
         let packageBody = fs.readFileSync(packageJson, 'utf8');
@@ -85,7 +65,7 @@ module.exports = class extends Generator {
       }
     };
 
-    this.writing_to_gemfile = function () {
+    this.write_to_gemfile = function () {
       const gemfile = 'Gemfile';
       if (fs.existsSync(gemfile)) {
         let gembody = fs.readFileSync(gemfile, 'utf8');
@@ -102,6 +82,26 @@ module.exports = class extends Generator {
       }
     };
   }
+
+  newrelic_config(manifestBody, language) {
+      let newrelicFile = '';
+      if (language === 'Python') {
+        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
+        }
+      }
+      if (language === 'Ruby') {
+        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
+        }
+      }
+      if (language === 'Javascript') {
+        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
+        }
+      }
+      return newrelicFile;
+    };
 
   prompting() {
     const prompts = [];
@@ -158,10 +158,10 @@ module.exports = class extends Generator {
           }
           this.fs.write(this.destinationPath('newrelic.ini'), content);
           // update manifest_dev.yml
-          this.writing_to_manifest('dev');
+          this.write_to_manifest('dev');
           // update manifest_prod.yml
-          this.writing_to_manifest('prod');
-          this.writing_to_requirements_txt();
+          this.write_to_manifest('prod');
+          this.write_to_requirements_txt();
         }).catch(this.env.error.bind(this.env));
     }
     if (this.config.get('projectBackendLanguage') === 'Ruby') {
@@ -177,10 +177,10 @@ module.exports = class extends Generator {
           }
           this.fs.write(this.destinationPath('newrelic.yml'), content);
           // update manifest_dev.yml
-          this.writing_to_manifest('dev');
+          this.write_to_manifest('dev');
           // update manifest_prod.yml
-          this.writing_to_manifest('prod');
-          this.writing_to_gemfile();
+          this.write_to_manifest('prod');
+          this.write_to_gemfile();
         }).catch(this.env.error.bind(this.env));
     }
     if (this.config.get('projectBackendLanguage') === 'Javascript') {
@@ -196,10 +196,10 @@ module.exports = class extends Generator {
           }
           this.fs.write(this.destinationPath('newrelic.js'), content);
           // update manifest_dev.yml
-          this.writing_to_manifest('dev');
+          this.write_to_manifest('dev');
           // update manifest_prod.yml
-          this.writing_to_manifest('prod');
-          this.writing_to_packages_json();
+          this.write_to_manifest('prod');
+          this.write_to_packages_json();
         }).catch(this.env.error.bind(this.env));
     }
     return result;
