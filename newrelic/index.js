@@ -1,6 +1,5 @@
 const axios = require('axios');
 const Generator = require('yeoman-generator');
-const fs = require('fs');
 
 const newrelicConfig = function (manifestBody, language) {
   let newrelicFile = '';
@@ -29,13 +28,12 @@ module.exports = class extends Generator {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
 
-    this.fs = fs;
     // choices are dev, production
     this.writeToManifest = function (environment, language) {
       const manifest = `manifest_${environment}.yml`;
       let manifestBody;
-      if (this.fs.existsSync(manifest)) {
-        manifestBody = this.fs.readFileSync(manifest, 'utf8');
+      if (this.fs.exists(manifest)) {
+        manifestBody = this.fs.read(manifest, 'utf8');
         if (manifestBody.indexOf('applications:') < 0) {
           manifestBody += '\napplications:\n';
           if (manifestBody.indexOf('env:') < 0) {
@@ -60,8 +58,8 @@ module.exports = class extends Generator {
 
     this.writeToRequirements_txt = function () {
       const requirementsFile = 'requirements.txt';
-      if (this.fs.existsSync(requirementsFile)) {
-        let requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
+      if (this.fs.exists(requirementsFile)) {
+        let requirementsBody = fs.read(requirementsFile, 'utf8');
         requirementsBody += '\nnewrelic\n';
         this.fs.write(requirementsFile, requirementsBody);
       } else {
@@ -71,8 +69,8 @@ module.exports = class extends Generator {
 
     this.writeToPackagesJson = function () {
       const packageJson = 'package.json';
-      if (this.fs.existsSync(packageJson)) {
-        let packageBody = fs.readFileSync(packageJson, 'utf8');
+      if (this.fs.exists(packageJson)) {
+        let packageBody = fs.read(packageJson, 'utf8');
         const jsonPackageObj = JSON.parse(packageBody);
         jsonPackageObj.dependencies.newrelic = 'latest';
         packageBody = JSON.stringify(jsonPackageObj);
@@ -84,8 +82,8 @@ module.exports = class extends Generator {
 
     this.writeToGemfile = function () {
       const gemfile = 'Gemfile';
-      if (this.fs.existsSync(gemfile)) {
-        let gembody = fs.readFileSync(gemfile, 'utf8');
+      if (this.fs.exists(gemfile)) {
+        let gembody = fs.read(gemfile, 'utf8');
         if (gembody.indexOf("source 'https://rubygems.org'") < 0) {
           gembody += "source 'https://rubygems.org'";
         }
