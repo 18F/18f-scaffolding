@@ -7,12 +7,13 @@ module.exports = class extends Generator {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
 
+    this.fs = fs;
     // choices are dev, production
-    this.write_to_manifest = function (environment, language) {
+    this.writeToManifest = function (environment, language) {
       const manifest = `manifest_${environment}.yml`;
       let manifestBody;
-      if (fs.existsSync(manifest)) {
-        manifestBody = fs.readFileSync(manifest, 'utf8');
+      if (this.fs.existsSync(manifest)) {
+        manifestBody = this.fs.readFileSync(manifest, 'utf8');
         if (manifestBody.indexOf('applications:') < 0) {
           manifestBody += '\napplications:\n';
           if (manifestBody.indexOf('env:') < 0) {
@@ -29,51 +30,45 @@ module.exports = class extends Generator {
         if (manifestBody.indexOf('NEW_RELIC_LOG:') < 0) {
           manifestBody += '\n    NEW_RELIC_LOG: "stdout"';
         }
-        fs.writeFile(manifest, manifestBody, (err) => {
-          if (err) throw err;
-        });
+        this.fs.append(manifest, manifestBody);
       } else {
         this.log('Please run yo 18f:cf-manifest first');
       }
     };
 
-    this.write_to_requirements_txt = function () {
+    this.writeToRequirements_txt = function () {
       const requirementsFile = 'requirements.txt';
-      if (fs.existsSync(requirementsFile)) {
+      if (this.fs.existsSync(requirementsFile)) {
         let requirementsBody = fs.readFileSync(requirementsFile, 'utf8');
         requirementsBody += '\nnewrelic\n';
-        fs.writeFile(requirementsFile, requirementsBody, (err) => {
-          if (err) throw err;
-        });
+        this.fs.write(requirementsFile, requirementsBody);
       } else {
         this.log('Please create requirements.txt first');
       }
     };
 
-    this.write_to_packages_json = function () {
+    this.writeToPackagesJson = function () {
       const packageJson = 'package.json';
-      if (fs.existsSync(packageJson)) {
+      if (this.fs.existsSync(packageJson)) {
         let packageBody = fs.readFileSync(packageJson, 'utf8');
         const jsonPackageObj = JSON.parse(packageBody);
         jsonPackageObj.dependencies.newrelic = 'latest';
         packageBody = JSON.stringify(jsonPackageObj);
-        fs.writeFile(packageJson, packageBody, (err) => {
-          if (err) throw err;
-        });
+        this.fs.append(packageJson, packageBody);
       } else {
         this.log('Please create package.json first');
       }
     };
 
-    this.write_to_gemfile = function () {
+    this.writeToGemfile = function () {
       const gemfile = 'Gemfile';
-      if (fs.existsSync(gemfile)) {
+      if (this.fs.existsSync(gemfile)) {
         let gembody = fs.readFileSync(gemfile, 'utf8');
         if (gembody.indexOf("source 'https://rubygems.org'") < 0) {
           gembody += "source 'https://rubygems.org'";
         }
         gembody += "\ngem 'newrelic_rpm'\n";
-        fs.writeFile(gemfile, gembody, (err) => {
+        this.fs.append(gemfile, gembody, (err) => {
           if (err) throw err;
         });
         this.log("Don't forget to run bundle install!");
@@ -83,25 +78,25 @@ module.exports = class extends Generator {
     };
   }
 
-  newrelic_config(manifestBody, language) {
-      let newrelicFile = '';
-      if (language === 'Python') {
-        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
-        }
+  newrelicConfig(manifestBody, language) {
+    let newrelicFile = '';
+    if (language === 'Python') {
+      if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+        newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
       }
-      if (language === 'Ruby') {
-        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
-        }
+    }
+    if (language === 'Ruby') {
+      if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+        newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
       }
-      if (language === 'Javascript') {
-        if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-          newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
-        }
+    }
+    if (language === 'Javascript') {
+      if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
+        newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
       }
-      return newrelicFile;
-    };
+    }
+    return newrelicFile;
+  }
 
   prompting() {
     const prompts = [];
@@ -158,10 +153,10 @@ module.exports = class extends Generator {
           }
           this.fs.write(this.destinationPath('newrelic.ini'), content);
           // update manifest_dev.yml
-          this.write_to_manifest('dev');
+          this.writeToManifest('dev');
           // update manifest_prod.yml
-          this.write_to_manifest('prod');
-          this.write_to_requirements_txt();
+          this.writeToManifest('prod');
+          this.writeToRequirements_txt();
         }).catch(this.env.error.bind(this.env));
     }
     if (this.config.get('projectBackendLanguage') === 'Ruby') {
@@ -177,10 +172,10 @@ module.exports = class extends Generator {
           }
           this.fs.write(this.destinationPath('newrelic.yml'), content);
           // update manifest_dev.yml
-          this.write_to_manifest('dev');
+          this.writeToManifest('dev');
           // update manifest_prod.yml
-          this.write_to_manifest('prod');
-          this.write_to_gemfile();
+          this.writeToManifest('prod');
+          this.writeToGemfile();
         }).catch(this.env.error.bind(this.env));
     }
     if (this.config.get('projectBackendLanguage') === 'Javascript') {
@@ -196,10 +191,10 @@ module.exports = class extends Generator {
           }
           this.fs.write(this.destinationPath('newrelic.js'), content);
           // update manifest_dev.yml
-          this.write_to_manifest('dev');
+          this.writeToManifest('dev');
           // update manifest_prod.yml
-          this.write_to_manifest('prod');
-          this.write_to_packages_json();
+          this.writeToManifest('prod');
+          this.writeToPackages_json();
         }).catch(this.env.error.bind(this.env));
     }
     return result;
