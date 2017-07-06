@@ -30,14 +30,15 @@
     "axios": "^0.15.3",
     "generator-npm-init": "^1.3.1",
     "yeoman-generator": "^1.0.1",
-    "chalk": "latest",
-    "lodash": "latest"
   },
   "devDependencies": {
-    "eslint": "^3.17.1",
+    "eslint": "^3.15.0",
+    "eslint-config-airbnb": "^15.0.1",
     "eslint-config-airbnb-base": "^11.1.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jest": "^19.0.1",
+    "eslint-plugin-jsx-a11y": "^3.0.2",
+    "eslint-plugin-react": "^6.9.0",
     "jest": "^19.0.2",
     "yeoman-test": "^1.6.0"
   },
