@@ -2,6 +2,7 @@ const axios = require('axios');
 const Generator = require('yeoman-generator');
 const jsyaml = require('js-yaml');
 const fs = require('fs');
+const sharedConfig = require('../shared-config');
 
 
 module.exports = class extends Generator {
@@ -20,25 +21,34 @@ module.exports = class extends Generator {
         const doc = jsyaml.load(manifestBody);
         if (manifestBody.indexOf('applications:') > 0) {
           if (manifestBody.indexOf('env:') > 0) {
-            if (language === 'Python') {
+            if (this.config.get('primaryLanguage') === 'Python') {
+              if (!Array.isArray(doc.applications.env)){
+                doc.applications.env = [];
+              } 
               doc.applications.env.push({
-                NEW_RELIC_APP_NAME: `${this.config.get('projectFullName')} (\${environment})`,
+                NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
                 NEW_RELIC_CONFIG_FILE: 'newrelic.ini',
                 NEW_RELIC_ENV: `${environment}`,
                 NEW_RELIC_LOG: 'stdout',
               });
             }
-            if (language === 'Ruby') {
+            if (this.config.get('primaryLanguage') === 'Ruby') {
+              if (!Array.isArray(doc.applications.env)){
+                doc.applications.env = [];
+              }
               doc.applications.env.push({
-                NEW_RELIC_APP_NAME: `${this.config.get('projectFullName')} (\${environment})`,
+                NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
                 NEW_RELIC_CONFIG_FILE: 'newrelic.yml',
                 NEW_RELIC_ENV: `${environment}`,
                 NEW_RELIC_LOG: 'stdout',
               });
             }
-            if (language === 'Javascript') {
+            if (this.config.get('primaryLanguage') === 'Javascript') {
+              if (!Array.isArray(doc.applications.env)){
+                doc.applications.env = [];
+              }
               doc.applications.env.push({
-                NEW_RELIC_APP_NAME: `${this.config.get('projectFullName')} (\${environment})`,
+                NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
                 NEW_RELIC_CONFIG_FILE: 'newrelic.js',
                 NEW_RELIC_ENV: `${environment}`,
                 NEW_RELIC_LOG: 'stdout',
@@ -96,7 +106,19 @@ module.exports = class extends Generator {
 
 
   prompting() {
-    const prompts = [];
+    const prompts = sharedConfig.promptsFor(
+      this.config,
+      sharedConfig.repoNamePrompt,
+      sharedConfig.primaryLanguagePrompt,
+      sharedConfig.languagesPrompt);
+    return this.prompt(prompts).then((props) => {
+      sharedConfig.saveResultsTo(this.config,
+                                 sharedConfig.repoNamePrompt,
+                                 sharedConfig.primaryLanguagePrompt,
+                                 sharedConfig.languagesPrompt)(props);
+    });
+  }
+    /*const prompts = [];
     if (!this.config.get('projectFullName')) {
       prompts.push({
         type: 'input',
@@ -133,20 +155,21 @@ module.exports = class extends Generator {
         this.config.set('projectBackendLanguage', props.projectBackendLanguage[0]);
       }
     });
-  }
+  }*/
 
   writing() {
     let result;
-    if (this.config.get('languages').contains('Python')) {
+    let languages = this.config.get('languages');
+    if (languages.indexOf('Python') > -1) {
       result = axios.get(
         'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/python-low-security.ini')
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
           let content = response.data.replace(
-            '[Project Name]', this.config.get('projectFullName'));
+            '[Project Name]', this.config.get('repoName'));
           while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', this.config.get('projectFullName'));
+            content = content.replace('[Project Name]', this.config.get('repoName'));
           }
           this.fs.write(this.destinationPath('newrelic.ini'), content);
           // update manifest_dev.yml
@@ -156,16 +179,16 @@ module.exports = class extends Generator {
           this.writeToRequirements_txt();
         }).catch(this.env.error.bind(this.env));
     }
-    if (this.config.get('languages').contains('Ruby')) {
+    if (languages.indexOf('Ruby') > -1) {
       result = axios.get(
         'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/ruby-low-security.yml')
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
           let content = response.data.replace(
-            '[Project Name]', this.config.get('projectFullName'));
+            '[Project Name]', this.config.get('repoName'));
           while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', this.config.get('projectFullName'));
+            content = content.replace('[Project Name]', this.config.get('repoName'));
           }
           this.fs.write(this.destinationPath('newrelic.yml'), content);
           // update manifest_dev.yml
@@ -175,16 +198,16 @@ module.exports = class extends Generator {
           this.writeToGemfile();
         }).catch(this.env.error.bind(this.env));
     }
-    if (this.config.get('languages').contains('Javascript')) {
+    if (languages.indexOf('Javascript') > -1) {
       result = axios.get(
         'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/javascript-low-security.js')
         .then((response) => {
         // Not EJS style, so we'll just search-and-replace
         // generate the newrelic.ini file
           let content = response.data.replace(
-            '[Project Name]', this.config.get('projectFullName'));
+            '[Project Name]', this.config.get('repoName'));
           while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', this.config.get('projectFullName'));
+            content = content.replace('[Project Name]', this.config.get('repoName'));
           }
           this.fs.write(this.destinationPath('newrelic.js'), content);
           // update manifest_dev.yml
