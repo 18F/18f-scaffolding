@@ -13,23 +13,22 @@ module.exports = class extends Generator {
     super(args, opts);
 
     // choices are dev, production
-    this.writeToManifest = function (environment, language) {
+    this.writeToManifest = function (environment) {
       const manifest = `manifest_${environment}.yml`;
       let manifestBody;
       if (this.fs.exists(manifest)) {
         manifestBody = this.fs.read(manifest, 'utf8');
-        let doc = jsyaml.safeLoad(manifestBody);
-        if (Object.keys(doc).indexOf("applications") < 0 ) {
-
-          doc.applications = { env: []};
+        const doc = jsyaml.safeLoad(manifestBody);
+        if (Object.keys(doc).indexOf('applications') < 0) {
+          doc.applications = { env: [] };
         }
-        if (Object.keys(doc).indexOf("env") < 0) {
+        if (Object.keys(doc).indexOf('env') < 0) {
           doc.applications.env = [];
         }
         if (this.config.get('primaryLanguage') === 'Python') {
-          if (!Array.isArray(doc.applications.env)){
+          if (!Array.isArray(doc.applications.env)) {
             doc.applications.env = [];
-          } 
+          }
           doc.applications.env.push({
             NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
             NEW_RELIC_CONFIG_FILE: 'newrelic.ini',
@@ -38,7 +37,7 @@ module.exports = class extends Generator {
           });
         }
         if (this.config.get('primaryLanguage') === 'Ruby') {
-          if (!Array.isArray(doc.applications.env)){
+          if (!Array.isArray(doc.applications.env)) {
             doc.applications.env = [];
           }
           doc.applications.env.push({
@@ -49,7 +48,7 @@ module.exports = class extends Generator {
           });
         }
         if (this.config.get('primaryLanguage') === 'Javascript') {
-          if (!Array.isArray(doc.applications.env)){
+          if (!Array.isArray(doc.applications.env)) {
             doc.applications.env = [];
           }
           doc.applications.env.push({
@@ -59,7 +58,7 @@ module.exports = class extends Generator {
             NEW_RELIC_LOG: 'stdout',
           });
         }
-         this.fs.append(manifest, jsyaml.safeDump(doc));
+        this.fs.append(manifest, jsyaml.safeDump(doc));
       } else {
         this.log('Please run yo 18f:cf-manifest first');
       }
@@ -121,7 +120,7 @@ module.exports = class extends Generator {
                                  sharedConfig.languagesPrompt)(props);
     });
   }
-    /*const prompts = [];
+    /* const prompts = [];
     if (!this.config.get('projectFullName')) {
       prompts.push({
         type: 'input',
@@ -162,7 +161,7 @@ module.exports = class extends Generator {
 
   writing() {
     let result;
-    let languages = this.config.get('languages');
+    const languages = this.config.get('languages');
     if (languages.indexOf('Python') > -1) {
       result = axios.get(
         'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/python-low-security.ini')
