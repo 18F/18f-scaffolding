@@ -137,7 +137,7 @@ module.exports = class extends Generator {
 
   writing() {
     let result;
-    if (this.config.get('projectBackendLanguage') === 'Python') {
+    if (this.config.get('languages').contains('Python')) {
       result = axios.get(
         'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/python-low-security.ini')
         .then((response) => {
@@ -156,7 +156,7 @@ module.exports = class extends Generator {
           this.writeToRequirements_txt();
         }).catch(this.env.error.bind(this.env));
     }
-    if (this.config.get('projectBackendLanguage') === 'Ruby') {
+    if (this.config.get('languages').contains('Ruby')) {
       result = axios.get(
         'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/ruby-low-security.yml')
         .then((response) => {
@@ -175,7 +175,7 @@ module.exports = class extends Generator {
           this.writeToGemfile();
         }).catch(this.env.error.bind(this.env));
     }
-    if (this.config.get('projectBackendLanguage') === 'Javascript') {
+    if (this.config.get('languages').contains('Javascript')) {
       result = axios.get(
         'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/javascript-low-security.js')
         .then((response) => {
