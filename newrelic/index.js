@@ -18,45 +18,48 @@ module.exports = class extends Generator {
       let manifestBody;
       if (this.fs.exists(manifest)) {
         manifestBody = this.fs.read(manifest, 'utf8');
-        const doc = jsyaml.load(manifestBody);
-        if (manifestBody.indexOf('applications:') > 0) {
-          if (manifestBody.indexOf('env:') > 0) {
-            if (this.config.get('primaryLanguage') === 'Python') {
-              if (!Array.isArray(doc.applications.env)){
-                doc.applications.env = [];
-              } 
-              doc.applications.env.push({
-                NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
-                NEW_RELIC_CONFIG_FILE: 'newrelic.ini',
-                NEW_RELIC_ENV: `${environment}`,
-                NEW_RELIC_LOG: 'stdout',
-              });
-            }
-            if (this.config.get('primaryLanguage') === 'Ruby') {
-              if (!Array.isArray(doc.applications.env)){
-                doc.applications.env = [];
-              }
-              doc.applications.env.push({
-                NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
-                NEW_RELIC_CONFIG_FILE: 'newrelic.yml',
-                NEW_RELIC_ENV: `${environment}`,
-                NEW_RELIC_LOG: 'stdout',
-              });
-            }
-            if (this.config.get('primaryLanguage') === 'Javascript') {
-              if (!Array.isArray(doc.applications.env)){
-                doc.applications.env = [];
-              }
-              doc.applications.env.push({
-                NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
-                NEW_RELIC_CONFIG_FILE: 'newrelic.js',
-                NEW_RELIC_ENV: `${environment}`,
-                NEW_RELIC_LOG: 'stdout',
-              });
-            }
-          }
-          this.fs.append(manifest, jsyaml.safeDump(doc));
+        let doc = jsyaml.safeLoad(manifestBody);
+        if (Object.keys(doc).indexOf("applications") < 0 ) {
+
+          doc.applications = { env: []};
         }
+        if (Object.keys(doc).indexOf("env") < 0) {
+          doc.applications.env = [];
+        }
+        if (this.config.get('primaryLanguage') === 'Python') {
+          if (!Array.isArray(doc.applications.env)){
+            doc.applications.env = [];
+          } 
+          doc.applications.env.push({
+            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
+            NEW_RELIC_CONFIG_FILE: 'newrelic.ini',
+            NEW_RELIC_ENV: `${environment}`,
+            NEW_RELIC_LOG: 'stdout',
+          });
+        }
+        if (this.config.get('primaryLanguage') === 'Ruby') {
+          if (!Array.isArray(doc.applications.env)){
+            doc.applications.env = [];
+          }
+          doc.applications.env.push({
+            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
+            NEW_RELIC_CONFIG_FILE: 'newrelic.yml',
+            NEW_RELIC_ENV: `${environment}`,
+            NEW_RELIC_LOG: 'stdout',
+          });
+        }
+        if (this.config.get('primaryLanguage') === 'Javascript') {
+          if (!Array.isArray(doc.applications.env)){
+            doc.applications.env = [];
+          }
+          doc.applications.env.push({
+            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
+            NEW_RELIC_CONFIG_FILE: 'newrelic.js',
+            NEW_RELIC_ENV: `${environment}`,
+            NEW_RELIC_LOG: 'stdout',
+          });
+        }
+         this.fs.append(manifest, jsyaml.safeDump(doc));
       } else {
         this.log('Please run yo 18f:cf-manifest first');
       }
@@ -172,6 +175,7 @@ module.exports = class extends Generator {
             content = content.replace('[Project Name]', this.config.get('repoName'));
           }
           this.fs.write(this.destinationPath('newrelic.ini'), content);
+          this.log(this.destinationPath('newrelic.ini'));
           // update manifest_dev.yml
           this.writeToManifest('dev');
           // update manifest_prod.yml
