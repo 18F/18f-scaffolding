@@ -1,25 +1,8 @@
 const axios = require('axios');
 const Generator = require('yeoman-generator');
+const jsyaml = require('js-yaml');
+const fs = require('fs');
 
-const newrelicConfig = function (manifestBody, language) {
-  let newrelicFile = '';
-  if (language === 'Python') {
-    if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-      newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.ini';
-    }
-  }
-  if (language === 'Ruby') {
-    if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-      newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.yml';
-    }
-  }
-  if (language === 'Javascript') {
-    if (manifestBody.indexOf('NEW_RELIC_CONFIG_FILE:') < 0) {
-      newrelicFile = '\n    NEW_RELIC_CONFIG_FILE: newrelic.js';
-    }
-  }
-  return newrelicFile;
-};
 
 module.exports = class extends Generator {
 
@@ -34,23 +17,36 @@ module.exports = class extends Generator {
       let manifestBody;
       if (this.fs.exists(manifest)) {
         manifestBody = this.fs.read(manifest, 'utf8');
-        if (manifestBody.indexOf('applications:') < 0) {
-          manifestBody += '\napplications:\n';
-          if (manifestBody.indexOf('env:') < 0) {
-            manifestBody += '  env:\n';
+        const doc = jsyaml.load(manifestBody);
+        if (manifestBody.indexOf('applications:') > 0) {
+          if (manifestBody.indexOf('env:') > 0) {
+            if (language === 'Python') {
+              doc.applications.env.push({
+                NEW_RELIC_APP_NAME: `${this.config.get('projectFullName')} (\${environment})`,
+                NEW_RELIC_CONFIG_FILE: 'newrelic.ini',
+                NEW_RELIC_ENV: `${environment}`,
+                NEW_RELIC_LOG: 'stdout',
+              });
+            }
+            if (language === 'Ruby') {
+              doc.applications.env.push({
+                NEW_RELIC_APP_NAME: `${this.config.get('projectFullName')} (\${environment})`,
+                NEW_RELIC_CONFIG_FILE: 'newrelic.yml',
+                NEW_RELIC_ENV: `${environment}`,
+                NEW_RELIC_LOG: 'stdout',
+              });
+            }
+            if (language === 'Javascript') {
+              doc.applications.env.push({
+                NEW_RELIC_APP_NAME: `${this.config.get('projectFullName')} (\${environment})`,
+                NEW_RELIC_CONFIG_FILE: 'newrelic.js',
+                NEW_RELIC_ENV: `${environment}`,
+                NEW_RELIC_LOG: 'stdout',
+              });
+            }
           }
+          this.fs.append(manifest, jsyaml.safeDump(doc));
         }
-        if (manifestBody.indexOf('NEW_RELIC_APP_NAME:') < 0) {
-          manifestBody += `\n    NEW_RELIC_APP_NAME: ${this.projectFullName} (${environment})`;
-        }
-        manifestBody += newrelicConfig(manifestBody, language);
-        if (manifestBody.indexOf('NEW_RELIC_ENV:') < 0) {
-          manifestBody += `\n    NEW_RELIC_ENV: "${environment}"`;
-        }
-        if (manifestBody.indexOf('NEW_RELIC_LOG:') < 0) {
-          manifestBody += '\n    NEW_RELIC_LOG: "stdout"';
-        }
-        this.fs.append(manifest, manifestBody);
       } else {
         this.log('Please run yo 18f:cf-manifest first');
       }
