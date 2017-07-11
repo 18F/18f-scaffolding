@@ -1,4 +1,3 @@
-const axios = require('axios');
 const Generator = require('yeoman-generator');
 const jsyaml = require('js-yaml');
 const fs = require('fs');
@@ -122,7 +121,6 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    let result;
     const languages = this.config.get('languages');
     const context = Object.assign({ repoName: this.config.get('repoName') }, this.config.getAll());
     if (languages.indexOf('Python') > -1) {
@@ -132,25 +130,22 @@ module.exports = class extends Generator {
       // update manifest_prod.yml
       this.writeToManifest('prod');
       this.writeToRequirements_txt();
-    
     }
     if (languages.indexOf('Ruby') > -1) {
-      this.fs.copyTpl(this.templatePath('ruby-low-security.yml'), this.destinationPath('newrelic.yml'), this.config.get('repoName'))  
+      this.fs.copyTpl(this.templatePath('ruby-low-security.yml'), this.destinationPath('newrelic.yml'), this.config.get('repoName'));
       // update manifest_dev.yml
       this.writeToManifest('dev');
       // update manifest_prod.yml
       this.writeToManifest('prod');
       this.writeToGemfile();
-    
     }
     if (languages.indexOf('Javascript') > -1) {
-      this.fs.copyTpl(this.templatePath('javascript-low-security.js'), this.destinationPath('newrelic.js'), this.config.get('repoName'))    
+      this.fs.copyTpl(this.templatePath('javascript-low-security.js'), this.destinationPath('newrelic.js'), this.config.get('repoName'));
       // update manifest_dev.yml
       this.writeToManifest('dev');
       // update manifest_prod.yml
       this.writeToManifest('prod');
       this.writeToPackages_json();
-  
     }
   }
 };
