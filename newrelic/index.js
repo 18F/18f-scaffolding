@@ -26,7 +26,7 @@ module.exports = class extends Generator {
           Python: 'newrelic.ini',
           Ruby: 'newrelic.yml',
           Node: 'newrelic.js',
-        }
+        };
         const primaryLang = this.config.get('primaryLanguage');
         if (Object.keys(fileByLang).includes(primaryLang)) {
           doc.applications.env.push({
@@ -46,7 +46,7 @@ module.exports = class extends Generator {
       const requirementsFile = 'requirements.txt';
       if (this.fs.exists(requirementsFile)) {
         let requirementsBody = fs.read(requirementsFile, 'utf8');
-        if (requirementsBody.indexOf('newrelic') < 0){
+        if (requirementsBody.indexOf('newrelic') < 0) {
           requirementsBody += '\nnewrelic\n';
           this.fs.write(requirementsFile, requirementsBody);
         }
@@ -63,7 +63,7 @@ module.exports = class extends Generator {
         if (!jsonPackageObj.dependencies.includes('newrelic')) {
           jsonPackageObj.dependencies.newrelic = 'latest';
           packageBody = JSON.stringify(jsonPackageObj);
-          this.fs.append(packageJson, packageBody);  
+          this.fs.append(packageJson, packageBody);
         }
       } else {
         this.log('Please create package.json first');
@@ -77,11 +77,11 @@ module.exports = class extends Generator {
         if (gembody.indexOf("source 'https://rubygems.org'") < 0) {
           gembody += "source 'https://rubygems.org'";
         }
-        if (gembody.indexOf("newrelic_rpm") < 0) {
+        if (gembody.indexOf('newrelic_rpm') < 0) {
           gembody += "\ngem 'newrelic_rpm'\n";
           this.fs.append(gemfile, gembody, (err) => {
             if (err) throw err;
-          });          
+          });
         }
         this.log("Don't forget to run bundle install!");
       } else {
@@ -109,7 +109,7 @@ module.exports = class extends Generator {
     const languages = this.config.get('languages');
     const context = this.config.getAll();
     if (languages.includes('Python')) {
-      this.fs.copyTpl(this.templatePath('python-low-security.ini'), this.destinationPath('newrelic.ini'), context);  
+      this.fs.copyTpl(this.templatePath('python-low-security.ini'), this.destinationPath('newrelic.ini'), context);
       this.writeToRequirements_txt();
     }
     if (languages.includes('Ruby')) {
