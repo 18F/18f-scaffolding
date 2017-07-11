@@ -38,8 +38,6 @@
     "eslint-config-airbnb-base": "^11.1.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jest": "^19.0.1",
-    "eslint-plugin-jsx-a11y": "^3.0.2",
-    "eslint-plugin-react": "^6.9.0",
     "jest": "^19.0.2",
     "yeoman-test": "^1.6.0"
   },
