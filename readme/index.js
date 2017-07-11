@@ -2,6 +2,7 @@ const axios = require('axios');
 const Generator = require('yeoman-generator');
 
 module.exports = class extends Generator {
+
   prompting() {
     const prompts = [];
     if (!this.config.get('projectFullName')) {

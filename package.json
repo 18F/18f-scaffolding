@@ -22,16 +22,19 @@
     "npm",
     "readme",
     "shared-config",
-    "todo"
+    "todo",
+    "newrelic"
   ],
   "homepage": "https://github.com/18F/18f-cli#readme",
   "dependencies": {
     "axios": "^0.15.3",
     "generator-npm-init": "^1.3.1",
+    "js-yaml": "^3.8.4",
     "yeoman-generator": "^1.0.1"
   },
   "devDependencies": {
-    "eslint": "^3.17.1",
+    "eslint": "^3.15.0",
+    "eslint-config-airbnb": "^15.0.1",
     "eslint-config-airbnb-base": "^11.1.1",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jest": "^19.0.1",
