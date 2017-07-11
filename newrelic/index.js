@@ -123,8 +123,8 @@ module.exports = class extends Generator {
 
   writing() {
     const languages = this.config.get('languages');
-    const context = Object.assign({ repoName: this.config.get('repoName') }, this.config.getAll());
-    if (languages.indexOf('Python') > -1) {
+    const context = this.config.getAll();
+    if (languages.includes('Python') {
       this.fs.copyTpl(this.templatePath('python-low-security.ini'), this.destinationPath('newrelic.ini'), context);
       // update manifest_dev.yml
       this.writeToManifest('dev');
@@ -132,7 +132,7 @@ module.exports = class extends Generator {
       this.writeToManifest('prod');
       this.writeToRequirements_txt();
     }
-    if (languages.indexOf('Ruby') > -1) {
+    if (languages.includes('Ruby')) {
       this.fs.copyTpl(this.templatePath('ruby-low-security.yml'), this.destinationPath('newrelic.yml'), context);
       // update manifest_dev.yml
       this.writeToManifest('dev');
@@ -140,7 +140,7 @@ module.exports = class extends Generator {
       this.writeToManifest('prod');
       this.writeToGemfile();
     }
-    if (languages.indexOf('Node') > -1) {
+    if (languages.includes('Node')) {
       this.fs.copyTpl(this.templatePath('javascript-low-security.js.template'), this.destinationPath('newrelic.js'), context);
       // update manifest_dev.yml
       this.writeToManifest('dev');
