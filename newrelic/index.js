@@ -20,7 +20,7 @@ module.exports = class extends Generator {
         manifestBody = this.fs.read(manifest, 'utf8');
         const doc = jsyaml.safeLoad(manifestBody);
         if (Object.keys(doc).indexOf('applications') < 0) {
-          doc.applications = { env: [] };
+          doc.applications = {};
         }
         if (Object.keys(doc).indexOf('env') < 0) {
           doc.applications.env = [];
