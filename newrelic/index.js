@@ -13,6 +13,7 @@ module.exports = class extends Generator {
 
     // choices are dev, production
     this.writeToManifest = function (environment) {
+      this.log("top of function");
       const manifest = `manifest_${environment}.yml`;
       let manifestBody;
       if (this.fs.exists(manifest)) {
@@ -46,7 +47,7 @@ module.exports = class extends Generator {
             NEW_RELIC_LOG: 'stdout',
           });
         }
-        if (this.config.get('primaryLanguage') === 'Javascript') {
+        if (this.config.get('primaryLanguage') === 'Node') {
           if (!Array.isArray(doc.applications.env)) {
             doc.applications.env = [];
           }
@@ -132,20 +133,20 @@ module.exports = class extends Generator {
       this.writeToRequirements_txt();
     }
     if (languages.indexOf('Ruby') > -1) {
-      this.fs.copyTpl(this.templatePath('ruby-low-security.yml'), this.destinationPath('newrelic.yml'), this.config.get('repoName'));
+      this.fs.copyTpl(this.templatePath('ruby-low-security.yml'), this.destinationPath('newrelic.yml'), context);
       // update manifest_dev.yml
       this.writeToManifest('dev');
       // update manifest_prod.yml
       this.writeToManifest('prod');
       this.writeToGemfile();
     }
-    if (languages.indexOf('Javascript') > -1) {
-      this.fs.copyTpl(this.templatePath('javascript-low-security.js'), this.destinationPath('newrelic.js'), this.config.get('repoName'));
+    if (languages.indexOf('Node') > -1) {
+      this.fs.copyTpl(this.templatePath('javascript-low-security.js.template'), this.destinationPath('newrelic.js'), context);
       // update manifest_dev.yml
       this.writeToManifest('dev');
       // update manifest_prod.yml
       this.writeToManifest('prod');
-      this.writeToPackages_json();
+      this.writeToPackagesJson();
     }
   }
 };

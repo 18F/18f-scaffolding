@@ -10,7 +10,7 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: [ [Project Name] ],
+  app_name: [ <%= repoName%> ],
   /*When "true", the agent collects performance data about your
   application and reports this data to the New Relic UI at
   newrelic.com. This global switch is normally overridden for
