@@ -30,7 +30,7 @@ module.exports = class extends Generator {
             doc.applications.env = [];
           }
           doc.applications.env.push({
-            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
+            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (${environment})`,
             NEW_RELIC_CONFIG_FILE: 'newrelic.ini',
             NEW_RELIC_ENV: `${environment}`,
             NEW_RELIC_LOG: 'stdout',
@@ -41,7 +41,7 @@ module.exports = class extends Generator {
             doc.applications.env = [];
           }
           doc.applications.env.push({
-            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
+            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (${environment})`,
             NEW_RELIC_CONFIG_FILE: 'newrelic.yml',
             NEW_RELIC_ENV: `${environment}`,
             NEW_RELIC_LOG: 'stdout',
@@ -52,7 +52,7 @@ module.exports = class extends Generator {
             doc.applications.env = [];
           }
           doc.applications.env.push({
-            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (\${environment})`,
+            NEW_RELIC_APP_NAME: `${this.config.get('repoName')} (${environment})`,
             NEW_RELIC_CONFIG_FILE: 'newrelic.js',
             NEW_RELIC_ENV: `${environment}`,
             NEW_RELIC_LOG: 'stdout',
@@ -120,106 +120,37 @@ module.exports = class extends Generator {
                                  sharedConfig.languagesPrompt)(props);
     });
   }
-    /* const prompts = [];
-    if (!this.config.get('projectFullName')) {
-      prompts.push({
-        type: 'input',
-        name: 'projectFullName',
-        message: 'What is the project\'s full name?',
-      });
-    }
-    if (!this.config.get('projectBackendLanguage')) {
-      prompts.push({
-        type: 'checkbox',
-        name: 'projectBackendLanguage',
-        message: 'What backend language is the project using?',
-        choices: [{
-          name: 'Django',
-          value: 'Python',
-          checked: false,
-        }, {
-          name: 'Rails',
-          value: 'Ruby',
-          checked: false,
-        }, {
-          name: 'Node.js',
-          value: 'Javascript',
-          checked: false,
-        }],
-      });
-    }
-
-    return this.prompt(prompts).then((props) => {
-      if (props.projectFullName) {
-        this.config.set('projectFullName', props.projectFullName);
-      }
-      if (props.projectBackendLanguage) {
-        this.config.set('projectBackendLanguage', props.projectBackendLanguage[0]);
-      }
-    });
-  }*/
 
   writing() {
     let result;
     const languages = this.config.get('languages');
+    const context = Object.assign({ repoName: this.config.get('repoName') }, this.config.getAll());
     if (languages.indexOf('Python') > -1) {
-      result = axios.get(
-        'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/python-low-security.ini')
-        .then((response) => {
-        // Not EJS style, so we'll just search-and-replace
-        // generate the newrelic.ini file
-          let content = response.data.replace(
-            '[Project Name]', this.config.get('repoName'));
-          while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', this.config.get('repoName'));
-          }
-          this.fs.write(this.destinationPath('newrelic.ini'), content);
-          this.log(this.destinationPath('newrelic.ini'));
-          // update manifest_dev.yml
-          this.writeToManifest('dev');
-          // update manifest_prod.yml
-          this.writeToManifest('prod');
-          this.writeToRequirements_txt();
-        }).catch(this.env.error.bind(this.env));
+      this.fs.copyTpl(this.templatePath('python-low-security.ini'), this.destinationPath('newrelic.ini'), context);
+      // update manifest_dev.yml
+      this.writeToManifest('dev');
+      // update manifest_prod.yml
+      this.writeToManifest('prod');
+      this.writeToRequirements_txt();
+    
     }
     if (languages.indexOf('Ruby') > -1) {
-      result = axios.get(
-        'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/ruby-low-security.yml')
-        .then((response) => {
-        // Not EJS style, so we'll just search-and-replace
-        // generate the newrelic.ini file
-          let content = response.data.replace(
-            '[Project Name]', this.config.get('repoName'));
-          while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', this.config.get('repoName'));
-          }
-          this.fs.write(this.destinationPath('newrelic.yml'), content);
-          // update manifest_dev.yml
-          this.writeToManifest('dev');
-          // update manifest_prod.yml
-          this.writeToManifest('prod');
-          this.writeToGemfile();
-        }).catch(this.env.error.bind(this.env));
+      this.fs.copyTpl(this.templatePath('ruby-low-security.yml'), this.destinationPath('newrelic.yml'), this.config.get('repoName'))  
+      // update manifest_dev.yml
+      this.writeToManifest('dev');
+      // update manifest_prod.yml
+      this.writeToManifest('prod');
+      this.writeToGemfile();
+    
     }
     if (languages.indexOf('Javascript') > -1) {
-      result = axios.get(
-        'https://raw.githubusercontent.com/18F/18f-cli/ericschles-newrelic-subgenerator/newrelic/templates/javascript-low-security.js')
-        .then((response) => {
-        // Not EJS style, so we'll just search-and-replace
-        // generate the newrelic.ini file
-          let content = response.data.replace(
-            '[Project Name]', this.config.get('repoName'));
-          while (content.indexOf('[Project Name') > 0) {
-            content = content.replace('[Project Name]', this.config.get('repoName'));
-          }
-          this.fs.write(this.destinationPath('newrelic.js'), content);
-          // update manifest_dev.yml
-          this.writeToManifest('dev');
-          // update manifest_prod.yml
-          this.writeToManifest('prod');
-          this.writeToPackages_json();
-        }).catch(this.env.error.bind(this.env));
+      this.fs.copyTpl(this.templatePath('javascript-low-security.js'), this.destinationPath('newrelic.js'), this.config.get('repoName'))    
+      // update manifest_dev.yml
+      this.writeToManifest('dev');
+      // update manifest_prod.yml
+      this.writeToManifest('prod');
+      this.writeToPackages_json();
+  
     }
-    return result;
   }
 };
