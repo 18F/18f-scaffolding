@@ -28,6 +28,7 @@ yo 18f:gitignores
 yo 18f:npm
 yo 18f:cf-manifest
 yo 18f:about-yml
+yo 18f:newrelic
 ```
 
 ## Install via Docker
@@ -175,6 +176,31 @@ $ yo 18f:about-yml
 $ tree
 .
 └── .about.yml
+```
+
+### New Relic
+
+Generates a New Relic config files with 18F-recommended defaults.
+
+```sh
+$ yo 18f:newrelic
+? What's the repo name? (A short name that acts as the project identifier) @TODO
+? What is the primary language (for Travis, Cloud.gov, etc.)? (Use arrow keys)
+❯ Go
+  Node
+  Python
+  Ruby
+? What languages will this project use?
+ ◯ Go
+ ◉ Node
+ ◯ Python
+❯◉ Ruby
+
+$ tree
+.
+├── newrelic.ini
+├── newrelic.js
+└── newrelic.yml
 ```
 
 ## Local Development
