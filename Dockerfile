@@ -1,27 +1,34 @@
 FROM node:6.10.2-alpine
 
-# Set HOME to /tmp so we are guaranteed to be able to write to it
-ENV NODE_PATH='/src/node_modules/:$NODE_PATH' \
-    PATH=/src/node_modules/.bin/:$PATH \
-    HOME=/tmp/
-    
-WORKDIR /src/
+RUN adduser -h /home -D -H yeoman \
+    && chown yeoman:yeoman /home \
+    && mkdir /workdir \
+    && chown yeoman:yeoman /workdir
+USER yeoman
 
-COPY ["package.json", "/src/"]
-RUN npm install -q && npm install -q yo
+RUN npm config set prefix='/home/global'
+ENV NODE_PATH=/home/node_modules \
+    PATH=/home/global/bin/:$PATH
+RUN npm install -q -g yo
+RUN mkdir -p /home/.config/configstore/ \
+    && echo '{"clientId": 0, "optOut": true}' > /home/.config/configstore/insight-yo.json
 
-COPY ["about-yml", "/src/about-yml"]
-COPY ["app", "/src/app"]
-COPY ["cf-manifest", "/src/cf-manifest"]
-COPY ["gitignores", "/src/gitignores"]
-COPY ["license", "/src/license"]
-COPY ["npm", "/src/npm"]
-COPY ["readme", "/src/readme"]
-COPY ["shared-config", "/src/shared-config"]
-COPY ["todo", "/src/todo"]
-RUN npm link -q
+WORKDIR /home/
+
+COPY ["package.json", "/home/"]
+COPY ["about-yml", "/home/about-yml"]
+COPY ["app", "/home/app"]
+COPY ["cf-manifest", "/home/cf-manifest"]
+COPY ["gitignores", "/home/gitignores"]
+COPY ["license", "/home/license"]
+COPY ["npm", "/home/npm"]
+COPY ["readme", "/home/readme"]
+COPY ["shared-config", "/home/shared-config"]
+COPY ["todo", "/home/todo"]
+
+RUN npm link -q --production
 
 WORKDIR /workdir/
 VOLUME /workdir/
 
-ENTRYPOINT ["yo", "--no-insight", "--no-update-notifier", "18f"]
+ENTRYPOINT ["yo", "18f"]
