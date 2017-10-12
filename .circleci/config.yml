@@ -13,6 +13,7 @@ jobs:
 
     steps:
       - checkout
+      - setup_remote_docker
 
       # Download and cache dependencies
       - restore_cache:
@@ -31,5 +32,16 @@ jobs:
       # run tests!
       - run: npm test
 
-
-
+      - run: docker build -t 18fcli .
+      - run:
+          name: Integration test for license
+          command: |
+            docker run --name license --entrypoint yo 18fcli 18f:license
+            docker cp license:/workdir /tmp/license
+            [ -f /tmp/license/LICENSE.md ]
+      - run:
+          name: Integration test for README
+          command: |
+            echo "ANew ProjProj" | docker run --name readme -i --entrypoint yo 18fcli 18f:readme
+            docker cp readme:/workdir /tmp/readme
+            grep "ANew ProjProj" /tmp/readme/README.md
