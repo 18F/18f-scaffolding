@@ -47,8 +47,6 @@ jobs:
             grep "ANew ProjProj" /tmp/readme/README.md
 
   publish:
-    <<: *defaults
-
     steps:
       - attach_workspace:
           at: ~/repo
