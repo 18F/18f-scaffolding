@@ -66,7 +66,7 @@ jobs:
 workflows:
   version: 2
 
-  build_and_test:
+  build_and_maybe_publish:
     jobs:
       - build
       - publish:
