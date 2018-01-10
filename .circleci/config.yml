@@ -8,9 +8,7 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/node:6
-      
-    working_directory: ~/repo
-
+    
     steps:
       - checkout
       - setup_remote_docker
@@ -52,8 +50,7 @@ jobs:
       - image: circleci/node:6  
 
     steps:
-      - attach_workspace:
-          at: ~/repo
+      - checkout
 
       - run: 
           name: Write NPM Token to ~/.npmrc
