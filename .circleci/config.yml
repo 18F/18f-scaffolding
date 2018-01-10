@@ -68,7 +68,12 @@ workflows:
 
   build_and_maybe_publish:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/        
       - publish:
           filters:
             tags:
