@@ -1,8 +1,15 @@
 const Generator = require('yeoman-generator');
 const jsyaml = require('js-yaml');
 const fs = require('fs');
-const sharedConfig = require('../shared-config');
 
+const allPrompts = require('../app/prompts');
+const { onlyNewPrompts, saveUpdatedPrompts } = require('../app/prompts/utils');
+
+const prompts = [
+  allPrompts.repoName,
+  allPrompts.primaryLanguage,
+  allPrompts.languages,
+];
 
 module.exports = class extends Generator {
 
@@ -92,17 +99,8 @@ module.exports = class extends Generator {
 
 
   prompting() {
-    const prompts = sharedConfig.promptsFor(
-      this.config,
-      sharedConfig.repoNamePrompt,
-      sharedConfig.primaryLanguagePrompt,
-      sharedConfig.languagesPrompt);
-    return this.prompt(prompts).then((props) => {
-      sharedConfig.saveResultsTo(this.config,
-                                 sharedConfig.repoNamePrompt,
-                                 sharedConfig.primaryLanguagePrompt,
-                                 sharedConfig.languagesPrompt)(props);
-    });
+    return this.prompt(onlyNewPrompts(this.config, prompts))
+      .then(saveUpdatedPrompts(this.config, prompts));
   }
 
   writing() {

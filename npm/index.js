@@ -1,18 +1,18 @@
 const Generator = require('yeoman-generator');
-const sharedConfig = require('../shared-config');
+const allPrompts = require('../app/prompts');
+const { onlyNewPrompts, saveUpdatedPrompts } = require('../app/prompts/utils');
 
-const frontendDepsPrompt = {
-  type: 'confirm',
-  name: 'frontendDeps',
-  message: 'Will this project have front end libraries/dependencies',
-  default: true,
-};
+const prompts = [
+  allPrompts.repoName,
+  allPrompts.description,
+  allPrompts.frontendDeps,
+  allPrompts.licenseShortName,
+];
 
 module.exports = class extends Generator {
   prompting() {
-    return this.prompt([frontendDepsPrompt]).then((answers) => {
-      this.config.set('frontendDeps', answers.frontendDeps);
-    });
+    return this.prompt(onlyNewPrompts(this.config, prompts))
+      .then(saveUpdatedPrompts(this.config, prompts));
   }
 
   configuring() {
@@ -23,7 +23,7 @@ module.exports = class extends Generator {
         description: this.config.get('description'),
         repo: `https://github.com/18F/${this.config.get('repoName')}`,
         author: '18f',
-        license: sharedConfig.licenseShortName,
+        license: this.config.get('licenseShortName'),
       });
     }
   }

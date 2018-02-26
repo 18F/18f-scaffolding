@@ -1,23 +1,15 @@
 const axios = require('axios');
 const Generator = require('yeoman-generator');
 
+const allPrompts = require('../app/prompts');
+const { onlyNewPrompts, saveUpdatedPrompts } = require('../app/prompts/utils');
+
+const prompts = [allPrompts.projectFullName];
+
 module.exports = class extends Generator {
-
   prompting() {
-    const prompts = [];
-    if (!this.config.get('projectFullName')) {
-      prompts.push({
-        type: 'input',
-        name: 'projectFullName',
-        message: 'What is the project\'s full name?',
-      });
-    }
-
-    return this.prompt(prompts).then((props) => {
-      if (props.projectFullName) {
-        this.config.set('projectFullName', props.projectFullName);
-      }
-    });
+    return this.prompt(onlyNewPrompts(this.config, prompts))
+      .then(saveUpdatedPrompts(this.config, prompts));
   }
 
   writing() {
