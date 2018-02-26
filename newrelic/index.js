@@ -1,22 +1,19 @@
-const Generator = require('yeoman-generator');
 const jsyaml = require('js-yaml');
 const fs = require('fs');
 
 const allPrompts = require('../app/prompts');
-const { onlyNewPrompts, saveUpdatedPrompts } = require('../app/prompts/utils');
-
-const prompts = [
-  allPrompts.repoName,
-  allPrompts.primaryLanguage,
-  allPrompts.languages,
-];
-
-module.exports = class extends Generator {
+const BaseGenerator = require('../app/base-generator');
 
 
+module.exports = class extends BaseGenerator {
   constructor(args, opts) {
     // Calling the super constructor is important so our generator is correctly set up
     super(args, opts);
+    this.prompts = [
+      allPrompts.repoName,
+      allPrompts.primaryLanguage,
+      allPrompts.languages,
+    ];
 
     // choices are dev, production
     this.writeToManifest = function (environment) {
@@ -99,8 +96,7 @@ module.exports = class extends Generator {
 
 
   prompting() {
-    return this.prompt(onlyNewPrompts(this.config, prompts))
-      .then(saveUpdatedPrompts(this.config, prompts));
+    return this.askAndSavePrompts();
   }
 
   writing() {

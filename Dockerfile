@@ -24,7 +24,6 @@ COPY ["license", "/home/license"]
 COPY ["newrelic", "/home/newrelic"]
 COPY ["npm", "/home/npm"]
 COPY ["readme", "/home/readme"]
-COPY ["todo", "/home/todo"]
 
 RUN npm link -q --production
 

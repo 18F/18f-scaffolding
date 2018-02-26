@@ -1,27 +1,29 @@
-const Generator = require('yeoman-generator');
 const allPrompts = require('../app/prompts');
-const { onlyNewPrompts, saveUpdatedPrompts } = require('../app/prompts/utils');
+const BaseGenerator = require('../app/base-generator');
 
-const prompts = [
-  allPrompts.repoName,
-  allPrompts.projectFullName,
-  allPrompts.description,
-  allPrompts.impact,
-  allPrompts.stage,
-  allPrompts.testable,
-  allPrompts.licenseShortName,
-  allPrompts.type,
-  allPrompts.ownerType,
-  allPrompts.partner,
-  allPrompts.contactName,
-  allPrompts.contactEmail,
-  allPrompts.parent,
-];
 
-module.exports = class extends Generator {
+module.exports = class extends BaseGenerator {
+  constructor(args, options) {
+    super(args, options);
+    this.prompts = [
+      allPrompts.repoName,
+      allPrompts.projectFullName,
+      allPrompts.description,
+      allPrompts.impact,
+      allPrompts.stage,
+      allPrompts.testable,
+      allPrompts.licenseShortName,
+      allPrompts.type,
+      allPrompts.ownerType,
+      allPrompts.partner,
+      allPrompts.contactName,
+      allPrompts.contactEmail,
+      allPrompts.parent,
+    ];
+  }
+
   prompting() {
-    return this.prompt(onlyNewPrompts(this.config, prompts))
-      .then(saveUpdatedPrompts(this.config, prompts));
+    return this.askAndSavePrompts();
   }
 
   writing() {

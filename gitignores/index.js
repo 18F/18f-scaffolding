@@ -1,7 +1,7 @@
 const axios = require('axios');
-const Generator = require('yeoman-generator');
+
 const allPrompts = require('../app/prompts');
-const { onlyNewPrompts, saveUpdatedPrompts } = require('../app/prompts/utils');
+const BaseGenerator = require('../app/base-generator');
 
 
 function fetchAndWriteGitignore(language, fs, gitignorePath, logError) {
@@ -27,12 +27,15 @@ function languagesAlreadyPresent(filePath, fs) {
   return languages;
 }
 
-const prompts = [allPrompts.languages];
 
-module.exports = class extends Generator {
+module.exports = class extends BaseGenerator {
+  constructor(args, opts) {
+    super(args, opts);
+    this.prompts = [allPrompts.languages];
+  }
+
   prompting() {
-    return this.prompt(onlyNewPrompts(this.config, prompts))
-      .then(saveUpdatedPrompts(this.config, prompts));
+    return this.askAndSavePrompts();
   }
 
   writing() {
