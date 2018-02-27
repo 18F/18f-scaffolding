@@ -1,7 +1,7 @@
 const axios = require('axios');
-const Generator = require('yeoman-generator');
+const BaseGenerator = require('../app/base-generator');
 
-module.exports = class extends Generator {
+module.exports = class extends BaseGenerator {
   writing() {
     const licenseReq = axios.get(
       'https://raw.githubusercontent.com/18F/open-source-policy/master/LICENSE.md')

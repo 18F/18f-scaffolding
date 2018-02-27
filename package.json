@@ -22,8 +22,6 @@
     "newrelic",
     "npm",
     "readme",
-    "shared-config",
-    "todo",
     "newrelic"
   ],
   "homepage": "https://github.com/18F/18f-cli#readme",
@@ -43,6 +41,6 @@
     "yeoman-test": "^1.6.0"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=8.0.0"
   }
 }

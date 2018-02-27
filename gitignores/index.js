@@ -1,6 +1,8 @@
 const axios = require('axios');
-const Generator = require('yeoman-generator');
-const sharedConfig = require('../shared-config');
+
+const allPrompts = require('../app/prompts');
+const BaseGenerator = require('../app/base-generator');
+
 
 function fetchAndWriteGitignore(language, fs, gitignorePath, logError) {
   const url = `https://raw.githubusercontent.com/github/gitignore/master/${language}.gitignore`;
@@ -25,12 +27,15 @@ function languagesAlreadyPresent(filePath, fs) {
   return languages;
 }
 
-module.exports = class extends Generator {
+
+module.exports = class extends BaseGenerator {
+  constructor(args, opts) {
+    super(args, opts);
+    this.prompts = [allPrompts.languages];
+  }
+
   prompting() {
-    return this.prompt(
-        sharedConfig.promptsFor(this.config, sharedConfig.languagesPrompt))
-      .then(
-        sharedConfig.saveResultsTo(this.config, sharedConfig.languagesPrompt));
+    return this.askAndSavePrompts();
   }
 
   writing() {

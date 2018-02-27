@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/node:6
+      - image: circleci/node:8
     
     steps:
       - checkout
@@ -47,7 +47,7 @@ jobs:
   publish:
     docker:
       # specify the version you desire here
-      - image: circleci/node:6  
+      - image: circleci/node:8
 
     steps:
       - checkout

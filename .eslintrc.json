@@ -15,5 +15,8 @@
     },
     "plugins": [
       "jest"
-    ]
+    ],
+    "rules": {
+      "no-underscore-dangle": 0
+    }
 }
