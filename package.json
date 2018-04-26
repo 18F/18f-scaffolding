@@ -14,7 +14,6 @@
     "url": "https://github.com/18F/18f-cli/issues"
   },
   "files": [
-    "about-yml",
     "app",
     "cf-manifest",
     "gitignores",
