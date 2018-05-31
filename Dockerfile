@@ -16,7 +16,6 @@ RUN mkdir -p /home/.config/configstore/ \
 WORKDIR /home/
 
 COPY ["package.json", "/home/"]
-COPY ["about-yml", "/home/about-yml"]
 COPY ["app", "/home/app"]
 COPY ["cf-manifest", "/home/cf-manifest"]
 COPY ["gitignores", "/home/gitignores"]

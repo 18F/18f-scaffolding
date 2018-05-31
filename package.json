@@ -1,6 +1,6 @@
 {
   "name": "generator-18f",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Scaffolding for 18F projects",
   "scripts": {
     "test": "eslint . && jest"
@@ -14,7 +14,6 @@
     "url": "https://github.com/18F/18f-cli/issues"
   },
   "files": [
-    "about-yml",
     "app",
     "cf-manifest",
     "gitignores",
