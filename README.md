@@ -80,7 +80,7 @@ $ tree
 Pulls Gitignore content from https://github.com/github/gitignore
 
 ```sh
-$ yo 18f:readme
+$ yo 18f:gitignores
 ? What languages will this project use?
  ◯ Go
  ◉ Node
